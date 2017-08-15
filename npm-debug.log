@@ -1,0 +1,149 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   'circos' ]
+2 info using npm@3.10.10
+3 info using node@v7.2.1
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly fetchPackageMetaData circos
+8 silly fetchNamedPackageData circos
+9 silly mapToRegistry name circos
+10 silly mapToRegistry using default registry
+11 silly mapToRegistry registry https://registry.npmjs.org/
+12 silly mapToRegistry data Result {
+12 silly mapToRegistry   raw: 'circos',
+12 silly mapToRegistry   scope: null,
+12 silly mapToRegistry   escapedName: 'circos',
+12 silly mapToRegistry   name: 'circos',
+12 silly mapToRegistry   rawSpec: '',
+12 silly mapToRegistry   spec: 'latest',
+12 silly mapToRegistry   type: 'tag' }
+13 silly mapToRegistry uri https://registry.npmjs.org/circos
+14 verbose request uri https://registry.npmjs.org/circos
+15 verbose request no auth needed
+16 info attempt registry request try #1 at 22:55:00
+17 verbose request id d0b27adf17b0a224
+18 verbose etag W/"58c9c881-5b7c"
+19 verbose lastModified Wed, 15 Mar 2017 23:04:33 GMT
+20 http request GET https://registry.npmjs.org/circos
+21 http 304 https://registry.npmjs.org/circos
+22 verbose headers { date: 'Thu, 23 Mar 2017 14:55:02 GMT',
+22 verbose headers   via: '1.1 varnish',
+22 verbose headers   'cache-control': 'max-age=300',
+22 verbose headers   etag: 'W/"58c9c881-5b7c"',
+22 verbose headers   age: '0',
+22 verbose headers   connection: 'keep-alive',
+22 verbose headers   'x-served-by': 'cache-nrt6120-NRT',
+22 verbose headers   'x-cache': 'MISS',
+22 verbose headers   'x-cache-hits': '0',
+22 verbose headers   'x-timer': 'S1490280902.142875,VS0,VE128',
+22 verbose headers   vary: 'Accept-Encoding' }
+23 silly get cb [ 304,
+23 silly get   { date: 'Thu, 23 Mar 2017 14:55:02 GMT',
+23 silly get     via: '1.1 varnish',
+23 silly get     'cache-control': 'max-age=300',
+23 silly get     etag: 'W/"58c9c881-5b7c"',
+23 silly get     age: '0',
+23 silly get     connection: 'keep-alive',
+23 silly get     'x-served-by': 'cache-nrt6120-NRT',
+23 silly get     'x-cache': 'MISS',
+23 silly get     'x-cache-hits': '0',
+23 silly get     'x-timer': 'S1490280902.142875,VS0,VE128',
+23 silly get     vary: 'Accept-Encoding' } ]
+24 verbose etag https://registry.npmjs.org/circos from cache
+25 verbose get saving circos to C:\Users\Alien\AppData\Roaming\npm-cache\registry.npmjs.org\circos\.cache.json
+26 verbose correctMkdir C:\Users\Alien\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+27 silly install normalizeTree
+28 silly loadCurrentTree Finishing
+29 silly loadIdealTree Starting
+30 silly install loadIdealTree
+31 silly cloneCurrentTree Starting
+32 silly install cloneCurrentTreeToIdealTree
+33 silly cloneCurrentTree Finishing
+34 silly loadShrinkwrap Starting
+35 silly install loadShrinkwrap
+36 silly loadShrinkwrap Finishing
+37 silly loadAllDepsIntoIdealTree Starting
+38 silly install loadAllDepsIntoIdealTree
+39 silly resolveWithNewModule circos@2.0.2 checking installable status
+40 silly cache add args [ 'circos', null ]
+41 verbose cache add spec circos
+42 silly cache add parsed spec Result {
+42 silly cache add   raw: 'circos',
+42 silly cache add   scope: null,
+42 silly cache add   escapedName: 'circos',
+42 silly cache add   name: 'circos',
+42 silly cache add   rawSpec: '',
+42 silly cache add   spec: 'latest',
+42 silly cache add   type: 'tag' }
+43 silly addNamed circos@latest
+44 verbose addNamed "latest" is being treated as a dist-tag for circos
+45 info addNameTag [ 'circos', 'latest' ]
+46 silly mapToRegistry name circos
+47 silly mapToRegistry using default registry
+48 silly mapToRegistry registry https://registry.npmjs.org/
+49 silly mapToRegistry data Result {
+49 silly mapToRegistry   raw: 'circos',
+49 silly mapToRegistry   scope: null,
+49 silly mapToRegistry   escapedName: 'circos',
+49 silly mapToRegistry   name: 'circos',
+49 silly mapToRegistry   rawSpec: '',
+49 silly mapToRegistry   spec: 'latest',
+49 silly mapToRegistry   type: 'tag' }
+50 silly mapToRegistry uri https://registry.npmjs.org/circos
+51 verbose addNameTag registry:https://registry.npmjs.org/circos not in flight; fetching
+52 verbose get https://registry.npmjs.org/circos not expired, no request
+53 silly addNameTag next cb for circos with tag latest
+54 silly addNamed circos@2.0.2
+55 verbose addNamed "2.0.2" is a plain semver version for circos
+56 silly mapToRegistry name circos
+57 silly mapToRegistry using default registry
+58 silly mapToRegistry registry https://registry.npmjs.org/
+59 silly mapToRegistry data Result {
+59 silly mapToRegistry   raw: 'circos',
+59 silly mapToRegistry   scope: null,
+59 silly mapToRegistry   escapedName: 'circos',
+59 silly mapToRegistry   name: 'circos',
+59 silly mapToRegistry   rawSpec: '',
+59 silly mapToRegistry   spec: 'latest',
+59 silly mapToRegistry   type: 'tag' }
+60 silly mapToRegistry uri https://registry.npmjs.org/circos
+61 verbose addRemoteTarball https://registry.npmjs.org/circos/-/circos-2.0.2.tgz not in flight; adding
+62 verbose addRemoteTarball [ 'https://registry.npmjs.org/circos/-/circos-2.0.2.tgz',
+62 verbose addRemoteTarball   '7a1d723b25bce3447b31be3b3353e49780aec649' ]
+63 info retry fetch attempt 1 at 22:55:01
+64 info attempt registry request try #1 at 22:55:01
+65 http fetch GET https://registry.npmjs.org/circos/-/circos-2.0.2.tgz
+66 http fetch 200 https://registry.npmjs.org/circos/-/circos-2.0.2.tgz
+67 info retry will retry, error on last attempt: Error: read ECONNRESET
+68 silly fetchAndShaCheck shasum 7a1d723b25bce3447b31be3b3353e49780aec649
+69 silly rollbackFailedOptional Starting
+70 silly rollbackFailedOptional Finishing
+71 silly runTopLevelLifecycles Finishing
+72 silly install printInstalled
+73 verbose stack Error: shasum check failed for C:\Users\Alien\AppData\Local\Temp\npm-5664-de45343e\registry.npmjs.org\circos\-\circos-2.0.2.tgz
+73 verbose stack Expected: 7a1d723b25bce3447b31be3b3353e49780aec649
+73 verbose stack Actual:   f9c8cbab63269e668930532d5a2ceeb513e80c6e
+73 verbose stack From:     https://registry.npmjs.org/circos/-/circos-2.0.2.tgz
+73 verbose stack     at C:\Program Files\nodejs\node_modules\npm\node_modules\sha\index.js:25:8
+73 verbose stack     at ReadStream.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\sha\index.js:72:7)
+73 verbose stack     at emitNone (events.js:91:20)
+73 verbose stack     at ReadStream.emit (events.js:185:7)
+73 verbose stack     at endReadableNT (_stream_readable.js:974:12)
+73 verbose stack     at _combinedTickCallback (internal/process/next_tick.js:74:11)
+73 verbose stack     at process._tickCallback (internal/process/next_tick.js:98:9)
+74 verbose cwd F:\codes\JavaEE\BikeSystem
+75 error Windows_NT 10.0.14393
+76 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "circos"
+77 error node v7.2.1
+78 error npm  v3.10.10
+79 error shasum check failed for C:\Users\Alien\AppData\Local\Temp\npm-5664-de45343e\registry.npmjs.org\circos\-\circos-2.0.2.tgz
+79 error Expected: 7a1d723b25bce3447b31be3b3353e49780aec649
+79 error Actual:   f9c8cbab63269e668930532d5a2ceeb513e80c6e
+79 error From:     https://registry.npmjs.org/circos/-/circos-2.0.2.tgz
+80 error If you need help, you may report this error at:
+80 error     <https://github.com/npm/npm/issues>
+81 verbose exit [ 1, true ]

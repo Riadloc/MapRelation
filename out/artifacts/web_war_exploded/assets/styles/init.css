@@ -1,0 +1,201 @@
+*, body, html {
+    margin: 0;
+    padding: 0;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+body {
+    font-size: 16px;
+    line-height: 1;
+    font-family: PingFangSC, "Microsoft YaHei UI", Helvetica, Arial, sans-serif;
+}
+
+body::-webkit-scrollbar {
+    width: 0;
+}
+
+label {
+    font-weight: 400;
+}
+
+button,.ui_button {
+    color: #fff!important;
+    font-size: 14px;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 8px;
+    background: #0277bd;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid #0277bd;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 6px, rgba(0, 0, 0, 0.117647) 0 1px 4px;
+    -moz-box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 6px, rgba(0, 0, 0, 0.117647) 0 1px 4px;
+    box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 6px, rgba(0, 0, 0, 0.117647) 0 1px 4px;
+}
+
+button:hover,.ui_button:hover {
+    background: #039be5;
+}
+
+.ui_button {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 30px;
+}
+
+input[type="text"],input[type="number"] {
+    width: 8rem;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+    color: #000;
+    border: none;
+    padding:0 6px;
+}
+
+span {
+    color: #fff;
+    margin-left: 3px;
+}
+
+.clearfix:after{content:".";display:block;height:0;clear:both;visibility:hidden}
+
+.transition-ruler {
+    position: absolute;
+    top: 700px;
+    right: 6%;
+    width: 60px;
+    height: 120px;
+    font-size: 0;
+    font-weight: bold;
+}
+
+.transition-ruler .gradient {
+    display: inline-block;
+    width: 40%;
+    height: 100%;
+}
+
+.transition-ruler .gradient-tips {
+    display: inline-block;
+    width: 60%;
+    height: 100%;
+    line-height: 100%;
+    text-align: left;
+    vertical-align: top;
+}
+.transition-ruler .gradient-tips div:nth-child(1) {
+    font-size: 12px;
+    width: 100%;
+    height: 90%;
+}
+
+.transition-ruler .gradient-tips div:nth-child(2) {
+    font-size: 12px;
+    width: 100%;
+    height: 10%;
+}
+
+.transition-ruler .gradient-tips div span {
+    display: inline-block;
+    line-height: 64px;
+    vertical-align: bottom;
+}
+
+.transition-ruler .g-y{
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(bottom,#4caf50,#ffeb3b);
+    background: -webkit-linear-gradient(bottom,#4caf50,#ffeb3b);
+}
+.transition-ruler .y-b{
+    width: 100%;
+    height: 50%;
+    background: -webkit-linear-gradient(bottom,#ffeb3b,#f44336);
+    background: linear-gradient(bottom,#ffeb3b,#f44336);
+}
+
+/*loading动画*/
+.loading {
+    position: absolute;
+    top: 750px;
+    right: 14%;
+    display: none;
+}
+.loading-a {
+    border:0;
+    margin:0;
+    width:16px;
+    height:16px;
+    position:absolute;
+    border-radius:50%;
+    animation:k-loadingO 2s ease infinite;
+    background:#19A68C;
+    animation-delay:-1.5s
+}
+.loading-b {
+    border:0;
+    margin:0;
+    width:16px;
+    height:16px;
+    position:absolute;
+    border-radius:50%;
+    animation:k-loadingO 2s ease infinite;
+    background:#F63D3A;
+    animation-delay:-1s
+}
+.loading-c {
+    border:0;
+    margin:0;
+    width:16px;
+    height:16px;
+    position:absolute;
+    border-radius:50%;
+    animation:k-loadingO 2s ease infinite;
+    background:#FDA543;
+    animation-delay:-0.5s
+}
+.loading-d {
+    border:0;
+    margin:0;
+    width:16px;
+    height:16px;
+    position:absolute;
+    border-radius:50%;
+    animation:k-loadingO 2s ease infinite;
+    background:#193B48
+}
+@keyframes k-loadingO {
+    0%,100% {
+        transform:translate(0)
+    }
+    25% {
+        transform:translate(160%)
+    }
+    50% {
+        transform:translate(160%,160%)
+    }
+    75% {
+        transform:translate(0,160%)
+    }
+}

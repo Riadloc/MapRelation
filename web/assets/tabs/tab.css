@@ -1,0 +1,49 @@
+.tabs-vertical ul{
+	text-align: center;
+	line-height: 40px;
+	list-style: none;
+}
+
+.tabs-vertical a{
+	color: #656a6d;
+	text-decoration: none;
+	outline: none;
+}
+
+.tabs-vertical {
+	display: flex;
+}
+
+.tabs-vertical .tabs-nav {
+	background-color: #D0D4DA;
+	flex: 0 0 200px;
+}
+
+.tabs-vertical .tabs-content {
+	flex: 1;
+	padding: 10px;
+	color: #fff;
+	box-sizing: border-box;
+	background-color: #292929;
+}
+
+.tabs-nav>li {
+	cursor: pointer;
+}
+
+.tabs-nav .tab-active {
+	background-color: #0277bd;
+}
+
+.tabs-nav .tab-active a {
+	color: #fff;
+}
+
+.tabs-content>div {
+	min-height: 200px;
+	display: none;
+}
+
+.tabs-content>.tab-content-active {
+	display: block;
+}

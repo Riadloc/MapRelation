@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <title>自行车站点</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link href="./assets/styles/init.css" rel="stylesheet">
+    <link href="./assets/styles/index.css" rel="stylesheet">
+    <link href="./assets/tabs/tab.css" rel="stylesheet">
+    <link href="./assets/styles/flatpickr.min.css" rel="stylesheet">
+    <script src="http://api.map.baidu.com/api?v=2.0&ak=E9Af9IGwyGDRXMv1lThzQcxCdPchzw9c"></script>
+    <script src="./assets/scripts/jquery-3.1.1.min.js"></script>
+    <script src="./assets/scripts/colors.js"></script>
+    <script src="http://cdn.bootcss.com/d3/4.8.0/d3.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/library/CurveLine/1.5/src/CurveLine.min.js"></script>
+    <script src="http://cdn.bootcss.com/echarts/3.5.3/echarts.js"></script>
+</head>
+<body>
+<div id="app">
+    <header><h1>自行车站点</h1></header>
+    <div class="wrapper">
+        <div id="map"></div>
+        <div class="tabs-vertical">
+            <ul class="tabs-nav">
+                <li data-index="0" class="tab-active"><a href="#tab1" data-toggle="tab">有向</a></li>
+                <li data-index="1"><a href="#tab2" data-toggle="tab">无向</a></li>
+            </ul>
+            <div class="tabs-content">
+                <div class="tab-content-active" id="tab1">
+                    <div class="days-option clearfix">
+                        <span>开始:<input type="text" class="fromDate from1" value="2014-04-05"/></span>
+                        <span>结束:<input type="text" class="toDate to1" value="2014-04-07"/></span>
+                        <div class="right-area">
+                            <button class="day">生成关系文件[天]</button>
+                            <button class="block">生成关系文件[时间段]</button>
+                        </div>
+                    </div>
+                    <div class="file-load">
+                        <label class="ui_button" for="xFile">读取文件</label><span class="file-name">选择上传的.net文件</span>
+                        <form class="form"><input type="file" id="xFile" style="position:absolute;clip:rect(0 0 0 0);"></form>
+                    </div>
+                    <div class="relations-area clearfix">
+                        <span>过滤:(1-<span class="max-num">max</span>)<input type="number" value="10" title="大于等于" class="filter"></span>
+                        <div class="right-area">
+                            <div style="margin-bottom: 16px">
+                                <button class="day—scatter">聚类散点</button>
+                                <button class="day-core">聚类中心联系</button>
+                                <button class="day—scatter-filter">聚类内散点联系</button>
+                            </div>
+                            <div>
+                                <button class="select-scatter">聚类中心选择</button>
+                                <button class="scatter-relation">聚类关联显示</button>
+                                <button class="cluster">生成聚类关系文件</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="options-area tab-pane" id="tab2">
+                    <div class="days-option clearfix">
+                        <span>开始:<input type="text" class="fromDate from2" value="2014-04-05"/></span>
+                        <span>结束:<input type="text" class="toDate to2" value="2014-04-07"/></span>
+                        <div class="right-area">
+                            <button class="undir-day">生成关系文件[天]</button>
+                            <button class="undir-block">生成关系文件[时间段]</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="histogram" style="width:700px;height: 230px"></div>
+        </div>
+        <div class="transition-ruler">
+            <div class="gradient">
+                <div class="y-b"></div>
+                <div class="g-y"></div>
+            </div>
+            <div class="gradient-tips">
+                <div class="gradient-max">255</div>
+                <div>0</div>
+            </div>
+        </div>
+        <div class="loading">
+            <div class="loading-a" ></div>
+            <div class="loading-b" ></div>
+            <div class="loading-c" ></div>
+            <div class="loading-d" ></div>
+        </div>
+    </div>
+</div>
+<script src="./assets/scripts/flatpickr.js"></script>
+<script src="./assets/scripts/dark.js"></script>
+<script src="./assets/scripts/base.js"></script>
+<script src="./assets/tabs/tab.js"></script>
+<script src="./assets/scripts/initmap.js"></script>
+</body>
+</html>
