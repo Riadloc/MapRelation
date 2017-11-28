@@ -16,9 +16,9 @@ public class DBManager {
         Connection con = null;
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            String url = "jdbc:oracle:thin:@localhost:1521:oracle";
-            String user = "scott";// 用户名,系统默认的账户名
-            String password = "scott";// 你安装时选设置的密码
+            String url = "jdbc:oracle:thin:@111.231.105.151:1521:ORCL";
+            String user = "sxy";// 用户名,系统默认的账户名
+            String password = "sxy";// 你安装时选设置的密码
             con = DriverManager.getConnection(url, user, password);
 
         } catch (Exception e) {

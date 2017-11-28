@@ -22,7 +22,7 @@
 
 .tabs-vertical .tabs-content {
 	flex: 1;
-	padding: 10px;
+	padding: 20px 16px;
 	color: #fff;
 	box-sizing: border-box;
 	background-color: #333;
@@ -42,7 +42,6 @@
 }
 
 .tabs-content>div {
-	min-height: 200px;
 	overflow: hidden;
 	display: none;
 }

@@ -12,7 +12,7 @@ import java.util.*;
  * Created by Alien on 2017/4/12.
  */
 public class ReadLines {
-    static String path = "F:\\codes\\Cluster\\";
+    static String path = "E:\\ColdAir\\relations\\";
     public static void generate(String from,String to) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null,dt2 = null;
@@ -46,18 +46,18 @@ public class ReadLines {
                 }
                 FileWriter fos = new FileWriter(file);
                 BufferedWriter bw = new BufferedWriter(fos);
-                bw.write("*Vertices "+stations.size()+"\r\n");
+                bw.write("*Vertices "+stations.size()+"\n");
                 for (int j = 0; j < stations.size(); j++) {
                     bw.write((j+1)+" \""+stations.get(j)+"\"");
                     bw.newLine();
                 }
-                bw.write("*Arcs "+array.length()+"\r\n");
+                bw.write("*Arcs\n");
                 for (int k = 0; k < array.length(); k++) {
                     int lease = stations.indexOf(array.getJSONObject(k).getString("lease"))+1;
                     int ret = stations.indexOf(array.getJSONObject(k).getString("return"))+1;
                     String nums = array.getJSONObject(k).getString("nums");
                     bw.write(lease+" "+ret+" "+nums);
-                    bw.newLine();
+                    bw.write("\n");
                 }
                 bw.flush();
                 bw.close();
@@ -112,15 +112,15 @@ public class ReadLines {
                         numbers.add(nums);
                     }
                 }
-                bw.write("*Vertices "+stations.size()+"\r\n");
+                bw.write("*Vertices "+stations.size()+"\n");
                 for (int j = 0; j < stations.size(); j++) {
                     bw.write((j+1)+" \""+stations.get(j)+"\"");
-                    bw.newLine();
+                    bw.write("\n");
                 }
-                bw.write("*Arcs "+numbers.size()+"\r\n");
+                bw.write("*Arcs\n");
                 for (int m = 0;m < numbers.size();m++) {
                     bw.write(lines.get(m)+" "+numbers.get(m));
-                    bw.newLine();
+                    bw.write("\n");
                 }
                 bw.flush();
                 bw.close();
@@ -152,18 +152,18 @@ public class ReadLines {
             }
             FileWriter fos = new FileWriter(file);
             BufferedWriter bw = new BufferedWriter(fos);
-            bw.write("*Vertices "+stations.size()+"\r\n");
+            bw.write("*Vertices "+stations.size()+"\n");
             for (int i = 0; i < stations.size(); i++) {
                 bw.write((i+1)+" \""+stations.get(i)+"\"");
-                bw.newLine();
+                bw.write("\n");
             }
-            bw.write("*Arcs "+array.length()+"\r\n");
+            bw.write("*Arcs\n");
             for (int j = 0; j < array.length(); j++) {
                 int lease = stations.indexOf(array.getJSONObject(j).getString("lease"))+1;
                 int ret = stations.indexOf(array.getJSONObject(j).getString("return"))+1;
                 String nums = array.getJSONObject(j).getString("nums");
                 bw.write(lease+" "+ret+" "+nums);
-                bw.newLine();
+                bw.write("\n");
             }
             bw.flush();
             bw.close();
@@ -203,15 +203,15 @@ public class ReadLines {
                     numbers.add(nums);
                 }
             }
-            bw.write("*Vertices "+stations.size()+"\r\n");
+            bw.write("*Vertices "+stations.size()+"\n");
             for (int i = 0; i < stations.size(); i++) {
                 bw.write((i+1)+" \""+stations.get(i)+"\"");
-                bw.newLine();
+                bw.write("\n");
             }
-            bw.write("*Arcs "+numbers.size()+"\r\n");
+            bw.write("*Arcs\n");
             for (int m = 0;m < numbers.size();m++) {
                 bw.write(lines.get(m)+" "+numbers.get(m));
-                bw.newLine();
+                bw.write("\n");
             }
             bw.flush();
             bw.close();
@@ -249,12 +249,12 @@ public class ReadLines {
             }
             FileWriter fos = new FileWriter(file);
             BufferedWriter bw = new BufferedWriter(fos);
-            bw.write("*Vertices "+stations.size()+"\r\n");
+            bw.write("*Vertices "+stations.size()+"\n");
             for (int i = 0; i < stations.size(); i++) {
                 bw.write((i+1)+" \""+stations.get(i)+"\"");
-                bw.newLine();
+                bw.write("\n");
             }
-            bw.write("*Arcs "+array.length());
+            bw.write("*Arcs");
             ArrayList<String[]> relArr = new ArrayList<>();
             for (int j = 0; j < array.length(); j++) {
                 int lease = stations.indexOf(array.getJSONObject(j).getString("lease"))+1;
@@ -264,7 +264,7 @@ public class ReadLines {
             }
             Collections.sort(relArr, new SortByLease());
             for (int i = 0; i < relArr.size(); i++) {
-                bw.newLine();
+                bw.write("\n");
                 bw.write(relArr.get(i)[0]+" "+relArr.get(i)[1]+" "+relArr.get(i)[2]);
             }
             bw.flush();
@@ -290,18 +290,18 @@ public class ReadLines {
                 }
                 FileWriter fos = new FileWriter(file);
                 BufferedWriter bw = new BufferedWriter(fos);
-                bw.write("*Vertices\r\n");
+                bw.write("*Vertices\n");
                 for (int j = 0; j < stations.size(); j++) {
                     bw.write((j+1)+" \""+stations.get(j)+"\"");
-                    bw.newLine();
+                    bw.write("\n");
                 }
-                bw.write("*Arcs\r\n");
+                bw.write("*Arcs\n");
                 for (int k = 0; k < array.length(); k++) {
                     int lease = stations.indexOf(array.getJSONObject(k).getString("lease"))+1;
                     int ret = stations.indexOf(array.getJSONObject(k).getString("return"))+1;
                     String nums = array.getJSONObject(k).getString("nums");
                     bw.write(lease+" "+ret+" "+nums);
-                    bw.newLine();
+                    bw.write("\n");
                 }
                 bw.flush();
                 bw.close();
@@ -409,8 +409,6 @@ public class ReadLines {
         int len = vertices.size();
         for (int i = 0; i < collection.size(); i++) {
             String[] line = collection.get(i).split(",");
-            System.out.println(line[line.length-1]);
-            System.out.println(line[line.length-2]);
             ArrayList<String> colList = new ArrayList<>();
             for (int j = 0; j < line.length; j++) {
                 colList.add(vertices.get(Integer.parseInt(line[j])-1));
@@ -455,7 +453,7 @@ public class ReadLines {
             for (int i = 0; i < array.size(); i++) {
                 TreeSet set = array.get(i);
                 bw.write("No"+(i+1)+":  "+set.toString().replaceAll("[\\[\\]]", ""));
-                bw.newLine();
+                bw.write("\n");
             }
             bw.flush();
             bw.close();

@@ -37,21 +37,20 @@
         $(".block").click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
         $(".undir-day").click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
         $(".undir-block").click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
-        $("#tab1").find(".day—scatter").click(() => {if(sign) addScatter("day");});           //聚类散点
-        $("#tab1").find(".day-core").click(() => sign && addCore("day"));                     //聚类中心联系
-        $("#tab3").find(".day—scatter").click(() => addScatter("lv_day"));           //聚类散点
-        $("#tab3").find(".day-core").click(() => addCore("lv_day"));                 //聚类中心联系
-        $(".scatter-relation").click(() => sign && addScatterRels());           //聚类关联显示
-        $(".cluster").click(() => sign && generateFilesByTime("cluster"));      //生成聚类关系文件
+        $("#tab1").find(".day—scatter").click(() => addScatter("day"));           //聚类散点
+        $("#tab1").find(".day-core").click(() => addCore("day"));                     //聚类中心联系
+        $("#tab2").find(".day—scatter").click(() => addScatter("lv_day"));           //聚类散点
+        $("#tab2").find(".day-core").click(() => addCore("lv_day"));                 //聚类中心联系
+        $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
+        $(".cluster").click(() =>  generateFilesByTime("cluster"));      //生成聚类关系文件
         $(".louvain_cluster").click(() => getCommunity());      //生成聚类关系文件
-        $(".select-scatter").click(() => sign && selectScatter());              //聚类中心选择
+        $(".select-scatter").click(() => selectScatter());              //聚类中心选择
         $(".day—scatter-filter").click(function(){                             //聚类内散点联系
-            if (sign) {
-                Common.clearMap();
-                $(".loading").show();
-                let id = trace[0];
-                addCurvlines(relations[id],null);
-            }
+            if(checkHasUpload()) return false;
+            Common.clearMap();
+            $(".loading").show();
+            let id = trace[0];
+            addCurvlines(relations[id],null);
         });
         $('#xFile').change(function(e){
             clearOverlays();
@@ -59,14 +58,22 @@
                 oldcores = cores;
                 cores = [];
             }
-            $(".file-name").text(e.currentTarget.files[0].name);
-            sign = true;
+            $("#IFile").text(e.currentTarget.files[0].name);
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
         });
         $('#louFile').change(function(e){
-            $(".louvain_filename").text(e.currentTarget.files[0].name);
+            $("#LFile").text(e.currentTarget.files[0].name);
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
         });
+    }
+
+    function checkHasUpload() {
+        const active = $(".tab-active").find("a").attr("href");
+        if ($(active).find('.file-name').text() === '选择上传net文件') {
+            layer.alert('请先上传net文件!', {icon: 6});
+            return false;
+        }
+        return true;
     }
 
     function addSubWay() {
@@ -83,7 +90,6 @@
     }
 
     function clearOverlays() {
-        $('.charts').hide();
         map.clearOverlays();
         addSubWay();
     }
@@ -96,7 +102,8 @@
     var Common = {
         getTime() {
             // const time = $(".file-name").text();
-            const time = $(".louvain_filename").text();
+            const active = $(".tab-active").find("a").attr("href");
+            const time = $(active).find(".file-name").text();
             const reg = /(_\d{4}){1,2}/g;
             if (reg.test(time)) {
                 return time.match(reg)[0].slice(1);
@@ -105,7 +112,8 @@
             }
         },
         getFileName() {
-            return $(".louvain_filename").text().slice(0,-4);
+            const active = $(".tab-active").find("a").attr("href");
+            return $(active).find(".file-name").text().slice(0,-4);
         },
         getInfo(point) {
             let info = {};
@@ -236,28 +244,30 @@
         }
     };
 
-    function getCommunity() {
-        if ($("#louFile")[0].files[0]) {
-            const worker = new Worker("assets/scripts/community.js");
-            const file = $("#louFile")[0].files[0];
-            console.log(file);
-            worker.postMessage(file);
-            console.log('Message posted to worker');
-            worker.onmessage = function (e) {
-                const community = e.data;
-                console.log(community);
-            }
-        } else {
-            layer.msg("请上传net文件！")
-        }
-    }
+    // function getCommunity() {
+    //     if ($("#louFile")[0].files[0]) {
+    //         const worker = new Worker("assets/scripts/community.js");
+    //         const file = $("#louFile")[0].files[0];
+    //         console.log(file);
+    //         worker.postMessage(file);
+    //         console.log('Message posted to worker');
+    //         worker.onmessage = function (e) {
+    //             const community = e.data;
+    //             console.log(community);
+    //         }
+    //     } else {
+    //         layer.msg("请上传net文件！")
+    //     }
+    // }
 
     function generateFilesByTime(timeType) {
         let url,params;
+        const active = $(".tab-active").find("a").attr("href");
+        if (!checkHasUpload()) return false;
         switch (timeType) {
             case("day"): {
                 url = "/byday";
-                params = {from: $(".from1").val(), to: $(".to1").val()};break;
+                params = {from: $(active).find(".from1").val(), to: $(active).find(".to1").val()};break;
             }
             case("udday"): {
                 url = "/byudday";
@@ -269,7 +279,7 @@
             }
             case("block"): {
                 url = "/byblock";
-                params = {from: $(".from1").val(), to: $(".to1").val()};break;
+                params = {from: $(active).find(".from1").val(), to: $(active).find(".to1").val()};break;
             }
             case("udblock"): {
                 url = "/byudblock";
@@ -302,8 +312,8 @@
 
         function generateTask(url,params) {
             $.get(url,params).then((res) => {
-                layer.msg(res);
-            })
+                layer.msg('生成文件成功！');
+            }).catch((e) => layer.msg('生成文件失败！'))
         }
         if(timeType!='cluster') {
             generateTask(url,params);
@@ -311,6 +321,7 @@
     }
 
     function addScatter(type) {
+        if (!checkHasUpload()) return false;
         Scatter(type, function () {
             let color = Common.color();
             getScatter(scatters).forEach(function (item,index) {
@@ -328,6 +339,7 @@
     }
 
     function addCore(type) {
+        if (!checkHasUpload()) return false;
         let options = null;
         $('.charts').show();myChart.showLoading();
         Core(type, function () {
@@ -335,7 +347,7 @@
             let color = Common.color();
             let distance = Common.getDistance();
             showHistogram();
-            if (type == "day") {
+            if (["day", "lv_day"].includes(type)) {
                 cores.forEach(function (item,index) {
                     options = {
                         color: color[index%38],
@@ -358,6 +370,7 @@
     }
 
     function addScatterRels() {
+        if (!checkHasUpload()) return false;
         let color = Common.color();
         Scatter("cluster", function () {
             Common.clearMap();
@@ -411,7 +424,8 @@
                 src = "/louvain";
                 params = {
                     day: time,
-                    fileName: fileName
+                    fileName: fileName,
+                    type: 'scatter'
                 };
                 break;
             }
@@ -421,6 +435,9 @@
             scatters = JSON.parse(res[0])[0];
             relations = JSON.parse(res[1])[0];
             fun();
+        }).catch((e) => {
+            layer.msg("获取聚类散点失败！");
+            $(".loading").hide();
         })
     }
 
@@ -452,7 +469,8 @@
                 src = "/louvain";
                 params = {
                     day: time,
-                    fileName: fileName
+                    fileName: fileName,
+                    type: 'cluster'
                 };
                 break;
             }
@@ -506,6 +524,7 @@
     function selectScatter() {
         Common.clearMap();
         selScatter.length = 0;
+        if (!checkHasUpload()) return false;
         Scatter("day", function () {
             let color = Common.color();
             let distance = Common.getDistance();
@@ -593,8 +612,9 @@
     }
 
     function addCurvlines(lines,cores,opt) {
-        let filter = parseInt($(".filter").val());
-        let maxnum = parseInt($(".max-num").text());
+        const active = $(".tab-active").find("a").attr("href");
+        const filter = parseInt($(active).find(".filter").val());
+        let maxnum = parseInt($(active).find(".max-num").text());
         const markers = new Set();
         if(Number.isNaN(maxnum) || opt) {
             maxnum = getMaxNum();

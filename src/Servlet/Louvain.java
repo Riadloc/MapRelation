@@ -28,15 +28,21 @@ public class Louvain extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String day = request.getParameter("day");
         String fileName = request.getParameter("fileName");
-        TreeMap map = ReadLines.getCollectionFromFile(fileName);
-        System.out.println(map);
+        String type = request.getParameter("type");
+        TreeMap<String,ArrayList<String>> map = ReadLines.getCollectionFromFile(fileName);
         JSON markers = net.sf.json.JSONArray.fromObject(map);
         long a = System.currentTimeMillis();
-        JSONArray relations = SqlHelper.getRelations(map,day);
-        long b = System.currentTimeMillis();
-        System.out.println("运行时间： " + (float)(b-a)/1000.0);
-        String markerss = markers.toString();
-        String relationss = relations.toString();
-        response.getWriter().write(markerss+"@"+relationss);
+        if (type.equals("scatter")) {
+            JSONArray relations = SqlHelper.getScatRels(map,day);
+            long b = System.currentTimeMillis();
+            System.out.println("运行时间： " + (float)(b-a)/1000.0);
+            response.getWriter().write(markers.toString()+"@"+relations.toString());
+        } else if (type.equals("cluster")) {
+            JSONArray relations = SqlHelper.getRelations(map,day);
+            long b = System.currentTimeMillis();
+            System.out.println("运行时间： " + (float)(b-a)/1000.0);
+            response.getWriter().write(markers.toString()+"@"+relations.toString());
+        }
+
     }
 }
