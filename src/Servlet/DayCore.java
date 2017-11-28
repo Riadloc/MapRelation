@@ -26,9 +26,8 @@ public class DayCore extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String day = request.getParameter("day");
-        System.out.println(day);
-        TreeMap map = ReadLines.getCollection(day);
-        System.out.println(map);
+        String fileName = request.getParameter("fileName");
+        TreeMap map = ReadLines.getCollection(fileName);
         JSON markers = net.sf.json.JSONArray.fromObject(map);
         long a = System.currentTimeMillis();
         JSONArray relations = SqlHelper.getRelations(map,day);

@@ -8,14 +8,14 @@
     (function initialize() {
         initialDefinite();
         bindListener();
+        addSubWay();
     })();
 
     function initialDefinite() {
         sign = false;
         myChart = echarts.init($('.histogram')[0], 'dark');
         colors= [red, purple, blue, limeA700, yellow600, orange600, indigoA400, cyanA200, pink, pink200, greenA200, blue200, brown600,
-            yellow300, lime900, deepOrange400, green900, purple900, red900, orange200, redA100, pink900,
-            purple200, cyan200, cyan900, lime400, lightBlue900, deepPurpleA200, green400, brown200, deepPurple200,
+            yellow300, lime900, deepOrange400, green900, purple900, red900, orange200, redA100, pink900, cyan200, cyan900, lime400, lightBlue900, deepPurpleA200, green400, brown200, deepPurple200,
             indigo900, indigo100,indigo300,blueGrey700 ,grey700,grey400,black,deepOrange200];
         size = [BMAP_POINT_SIZE_SMALL,BMAP_POINT_SIZE_NORMAL,BMAP_POINT_SIZE_BIG,BMAP_POINT_SIZE_BIGGER,BMAP_POINT_SIZE_HUGE],
             $(".fromDate").flatpickr({
@@ -33,21 +33,21 @@
     }
 
     function bindListener() {
-        $(".day").click(() => generateFilesByTime("day"));
-        $(".hour").click(() => generateFilesByTime("hour"));
-        $(".block").click(() => generateFilesByTime("block"));
-        $(".undir-day").click(() => generateFilesByTime("udday"));
-        $(".undir-block").click(() => generateFilesByTime("udblock"));
-        $(".day—scatter").click(() => {if(sign) addScatter("day");});
-        $(".hour—scatter").click(() => sign&&addScatter("hour"));
-        $(".day-core").click(() => sign && addCore("day"));
-        $(".scatter-relation").click(() => sign && addScatterRels());
-        $(".hour-core").click(() => sign && addCore("hour"));
-        $(".cluster").click(() => sign && generateFilesByTime("cluster"));
-        $(".select-scatter").click(() => sign && selectScatter());
-        $(".day—scatter-filter").click(function(){
+        $(".day").click(() => generateFilesByTime("day"));                      //有向-生成关系文件[天]
+        $(".block").click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
+        $(".undir-day").click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
+        $(".undir-block").click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
+        $("#tab1").find(".day—scatter").click(() => {if(sign) addScatter("day");});           //聚类散点
+        $("#tab1").find(".day-core").click(() => sign && addCore("day"));                     //聚类中心联系
+        $("#tab3").find(".day—scatter").click(() => addScatter("lv_day"));           //聚类散点
+        $("#tab3").find(".day-core").click(() => addCore("lv_day"));                 //聚类中心联系
+        $(".scatter-relation").click(() => sign && addScatterRels());           //聚类关联显示
+        $(".cluster").click(() => sign && generateFilesByTime("cluster"));      //生成聚类关系文件
+        $(".louvain_cluster").click(() => getCommunity());      //生成聚类关系文件
+        $(".select-scatter").click(() => sign && selectScatter());              //聚类中心选择
+        $(".day—scatter-filter").click(function(){                             //聚类内散点联系
             if (sign) {
-                map.clearOverlays();
+                Common.clearMap();
                 $(".loading").show();
                 let id = trace[0];
                 addCurvlines(relations[id],null);
@@ -63,11 +63,29 @@
             sign = true;
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
         });
+        $('#louFile').change(function(e){
+            $(".louvain_filename").text(e.currentTarget.files[0].name);
+            console.log(e.currentTarget.files[0]);//e就是你获取的file对象
+        });
+    }
+
+    function addSubWay() {
+        let points = [
+            [[120.354264,30.316329],[120.341868,30.315456]],[[120.341221,30.315425],[120.332328,30.315347]],[[120.331735,30.315362],[120.319284,30.31569]],[[120.318745,30.315721],[120.285185,30.31689]],[[120.284897,30.31689],[120.282094,30.31664],[120.274549,30.313835],[120.273183,30.313772]],[[120.273183,30.313772],[120.268117,30.313866],[120.261541,30.31293],[120.259026,30.312026]],[[120.258595,30.311777],[120.247815,30.30657]],[[120.247384,30.306344],[120.234161,30.301332],[120.23028,30.300396]],[[120.229633,30.300241],[120.221225,30.298183],[120.214398,30.294441],[120.199342,30.290324]],[[120.198678,30.290106],[120.197708,30.289794],[120.194761,30.28967],[120.187323,30.29101],[120.18373,30.290886]],[[120.183155,30.290886],[120.178879,30.290168],[120.175897,30.289171],[120.173238,30.287705],[120.172268,30.287011],[120.172268,30.286075]],[[120.172268,30.285576],[120.172375,30.281335],[120.170112,30.276563],[120.17004,30.275752],[120.170255,30.26861]],[[120.170291,30.268111],[120.170507,30.26078]],[[120.170579,30.26025],[120.170902,30.254978],[120.172232,30.25267],[120.173489,30.251765],[120.174064,30.251703]],[[120.174567,30.251671],[120.183766,30.251297],[120.186497,30.250767],[120.187323,30.250268]],[[120.18779,30.249987],[120.197205,30.242905]],[[120.1976,30.242499],[120.203672,30.237164]],[[120.204139,30.236727],[120.213087,30.227444],[120.222824,30.216163],[120.222896,30.215726]],[[120.223004,30.215188],[120.223974,30.206074]],[[120.224046,30.205513],[120.225447,30.195243],[120.226489,30.193745],[120.226956,30.193464]],[[120.227388,30.193183],[120.228034,30.192746],[120.235652,30.191029],[120.237017,30.19003]],[[120.237449,30.189718],[120.241006,30.186222],[120.24,30.182101],[120.240718,30.174226]]
+        ];
+        points.forEach(item => {
+            let pointsArr = item.map(point => new BMap.Point(point[0], point[1]));
+            let polyline = new BMap.Polyline(pointsArr, {
+                strokeColor: '#DC0000', strokeWeight: 2, strokeOpacity: 1
+            });
+            map.addOverlay(polyline);
+        });
     }
 
     function clearOverlays() {
         $('.charts').hide();
         map.clearOverlays();
+        addSubWay();
     }
 
     function showLoading() {
@@ -76,18 +94,18 @@
     }
 
     var Common = {
-        getTime(){
-            let time = $(".file-name").text();
-            if (time.length >= 28) {
-                time = time.slice(6,-4);
-            } else if (time.length == 19) {
-                time = time.substr(6,9);
-            } else if (time.length == 14){
-                time = time.substr(6,4);
+        getTime() {
+            // const time = $(".file-name").text();
+            const time = $(".louvain_filename").text();
+            const reg = /(_\d{4}){1,2}/g;
+            if (reg.test(time)) {
+                return time.match(reg)[0].slice(1);
             } else {
-                time = time.substr(6,2);
+                alert('选择文件错误！')
             }
-            return time;
+        },
+        getFileName() {
+            return $(".louvain_filename").text().slice(0,-4);
         },
         getInfo(point) {
             let info = {};
@@ -169,6 +187,10 @@
                 default: alert("出错！");
             }
         },
+        clearMap() {
+            map.clearOverlays();
+            addSubWay();
+        },
         initHistogram() {
             myChart.setOption({
                 color: ['#3388DB'],
@@ -199,91 +221,64 @@
         },
         initStackChart() {
             myChart.setOption({
-                tooltip : {
-                    trigger: 'axis',
-                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
-                        type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-                    }
-                },
-                legend: {
-                    data: []
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
+                tooltip : {trigger: 'axis',
+                    axisPointer : {type : 'shadow'}},
+                legend: {data: []},
+                grid: {left: '3%', right: '4%', bottom: '3%', containLabel: true},
                 xAxis : [
                     {
                         type : 'category',
                         data : ['06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21']
-                    }
-                ],
-                yAxis : [
-                    {
-                        type : 'value'
-                    }
-                ],
-                series : [
-                    {
-                        name:'',
-                        type:'bar',
-                        stack: '热度',
-                        data:[]
-                    }
-                ]
+                    }],
+                yAxis : [{type : 'value'}],
+                series : [{name:'', type:'bar', stack: '热度', data:[]}]
             })
         }
     };
+
+    function getCommunity() {
+        if ($("#louFile")[0].files[0]) {
+            const worker = new Worker("assets/scripts/community.js");
+            const file = $("#louFile")[0].files[0];
+            console.log(file);
+            worker.postMessage(file);
+            console.log('Message posted to worker');
+            worker.onmessage = function (e) {
+                const community = e.data;
+                console.log(community);
+            }
+        } else {
+            layer.msg("请上传net文件！")
+        }
+    }
 
     function generateFilesByTime(timeType) {
         let url,params;
         switch (timeType) {
             case("day"): {
                 url = "/byday";
-                params = {
-                    from: $(".from1").val(),
-                    to: $(".to1").val()
-                };
-                break;
+                params = {from: $(".from1").val(), to: $(".to1").val()};break;
             }
             case("udday"): {
                 url = "/byudday";
-                params = {
-                    from: $(".from2").val(),
-                    to: $(".to2").val()
-                };
-                break;
+                params = {from: $(".from2").val(), to: $(".to2").val()};break;
             }
             case("hour"): {
                 url = "/byday";
-                params = {
-                    day: $(".the-day").val()
-                };
-                break;
+                params = {day: $(".the-day").val()};break;
             }
             case("block"): {
                 url = "/byblock";
-                params = {
-                    from: $(".from1").val(),
-                    to: $(".to1").val()
-                };
-                break;
+                params = {from: $(".from1").val(), to: $(".to1").val()};break;
             }
             case("udblock"): {
                 url = "/byudblock";
-                params = {
-                    from: $(".from2").val(),
-                    to: $(".to2").val()
-                };
-                break;
+                params = {from: $(".from2").val(), to: $(".to2").val()};break;
             }
             case("cluster"): {
                 let time = Common.getTime();
                 if (selScatter.length == 0) {
-                    alert("请先选择聚点 or 选择文件错误");
-                    return;
+                    alert("请先选择聚点 or 选择文件错误");return;
                 }
                 let stations = [];
                 selScatter.forEach(function (key) {
@@ -292,13 +287,7 @@
                     })
                 });
                 url = "/bycluster";
-                params = {
-                    from: "",
-                    to: "",
-                    stations: stations.join(","),
-                    number: selScatter.length,
-                    traditional: true
-                };
+                params = {from: "", to: "", stations: stations.join(","), number: selScatter.length, traditional: true };
                 if (time.length>4) {
                     params.from = time.substr(0,4);
                     params.to = time.substr(5,4);
@@ -306,16 +295,14 @@
                     params.from = time;
                     params.to = time;
                 }
-                $.post(url,params).then((res) => {
-                    console.log(res);
-                }).catch((e) => console.log(e));
+                $.post(url,params).then((res) => {console.log(res);}).catch((e) => console.log(e));
                 break;
             }
         }
 
         function generateTask(url,params) {
             $.get(url,params).then((res) => {
-                console.log(res);
+                layer.msg(res);
             })
         }
         if(timeType!='cluster') {
@@ -373,20 +360,11 @@
     function addScatterRels() {
         let color = Common.color();
         Scatter("cluster", function () {
-            map.clearOverlays();
-            // getScatter(scatters).forEach(function (item,index) {
-            //     let options = {
-            //         color: color[index%38],
-            //         size: size[1]
-            //     };
-            //     Marker(item,options);
-            //     // if(!cores[0].length) {
-            //     //     cores = getCore(scatters);
-            //     // }
-            // });
-
+            Common.clearMap();
             for (let key in relations) {
-                addCurvlines(relations[key],null,color);
+                let idx = key.split('-');
+                console.log(idx);
+                addCurvlines(relations[key],null,[color[idx[0]-1], color[idx[1]-1]]);
             }
             $(".loading").hide();
         });
@@ -395,18 +373,20 @@
     function Scatter(type,fun) {
         let src,params;
         $(".loading").show();
-        map.clearOverlays();
+        Common.clearMap();
         // if (time == Common.getTime()) {
         //     fun();
         //     return;
         // } else {
         time = Common.getTime();
+        const fileName = Common.getFileName();
         // }
         switch(type) {
             case "day": {
                 src = "/dayscatter";
                 params = {
-                    day: time
+                    day: time,
+                    fileName: fileName
                 };
                 break;
             }
@@ -414,14 +394,24 @@
                 src = "/scaRel";
                 params = {
                     day: time,
-                    idArray: selScatter.toString()
+                    idArray: selScatter.toString(),
+                    fileName: fileName
                 };
                 break;
             }
             case "hour": {
                 src = "/hourscatter";
                 params = {
-                    hour: time
+                    hour: time,
+                    fileName: fileName
+                };
+                break;
+            }
+            case "lv_day": {
+                src = "/louvain";
+                params = {
+                    day: time,
+                    fileName: fileName
                 };
                 break;
             }
@@ -437,13 +427,15 @@
     function Core(type,fun) {
         let src,params;
         $(".loading").show();
-        map.clearOverlays();
-        let time = Common.getTime();
+        Common.clearMap();
+        const time = Common.getTime();
+        const fileName = Common.getFileName();
         switch(type) {
             case "day": {
                 src = "/daycore";
                 params = {
-                    day: time
+                    day: time,
+                    fileName: fileName
                 };
                 break;
             }
@@ -451,7 +443,16 @@
                 src = "/hourcore";
                 params = {
                     day: "2014-04-05",
-                    hour: time
+                    hour: time,
+                    fileName: fileName
+                };
+                break;
+            }
+            case "lv_day": {
+                src = "/louvain";
+                params = {
+                    day: time,
+                    fileName: fileName
                 };
                 break;
             }
@@ -503,7 +504,7 @@
     }
 
     function selectScatter() {
-        map.clearOverlays();
+        Common.clearMap();
         selScatter.length = 0;
         Scatter("day", function () {
             let color = Common.color();
@@ -518,8 +519,8 @@
         });
     }
 
-    function newMarker(data) {
-        map.addOverlay(new BMap.Circle(data,40,{fillColor:"#f00",fillOpacity:0.8,strokeOpacity: 0}));
+    function newMarker(data, color) {
+        map.addOverlay(new BMap.Circle(data,40,{fillColor:color,fillOpacity:0.8,strokeOpacity: 0.8,strokeWeight:0,strokeColor: color}));
     }
 
     function Marker(data,options,type) {
@@ -600,7 +601,7 @@
             $(".max-num").html(maxnum);
         }
         let id = trace[0];
-        lines.forEach(function (item) {
+        lines.forEach(function (item ,index) {
             let num = parseInt(item.nums);
             let weight = Common.getWeight(maxnum,num);
             if (num >= filter) {
@@ -626,9 +627,9 @@
                         })
                     }
                 });
-                if(opt) {
-                    newMarker(marker1);
-                    newMarker(marker2);
+                if(opt != null) {
+                    newMarker(marker1, opt[0]);
+                    newMarker(marker2, opt[1]);
                 }
                 // console.log(Common.getID(marker1)+" "+Common.getID(marker2));
                 map.addOverlay(curveline);
@@ -637,11 +638,12 @@
         });
         if ((!cores)&&id) {
             let array = [];
+            const colors = Common.color();
             scatters[id].forEach(function (point) {
                 let marker = Common.getLngLat(point);
                 array.push(new BMap.Point(marker.lng,marker.lat));
             });
-            Marker(array, {color: colors[(parseInt(id)-1)%38], size: size[1]}, "info");
+            Marker(array, {color: colors[(id-1)%38], size: size[1]}, "info");
         }
         function addArrow(lines,line_style) {
             //arrow

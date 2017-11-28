@@ -24,7 +24,8 @@ public class HourCore extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String day = request.getParameter("day");
         String hour = request.getParameter("hour");
-        TreeMap map = ReadLines.getCollection(hour);
+        String fileName = request.getParameter("fileName");
+        TreeMap map = ReadLines.getCollection(fileName);
         System.out.println(map);
         JSON markers = net.sf.json.JSONArray.fromObject(map);
         JSONArray relations = ReadLines.getRelations(map,day,hour);

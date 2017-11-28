@@ -25,7 +25,8 @@ public class ScaRel extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String day = request.getParameter("day");
         String[] idArray = request.getParameter("idArray").split(",");
-        TreeMap map = ReadLines.getCollection(day);
+        String fileName = request.getParameter("fileName");
+        TreeMap map = ReadLines.getCollection(fileName);
         TreeMap newMap = new TreeMap();
         for (int i=0;i<idArray.length;i++) {
             newMap.put(idArray[i],map.get(idArray[i]));

@@ -64,7 +64,7 @@ public class SqlHelper {
         String date = day.replace("-","");
         try {
             con= DBManager.getConnection();
-            String sql="select LEASESTATION,RETURNSTATION,count(bikenum) as nums from B_LEASEINFOHIS_SUM_PART partition(D"+date+") group by LEASESTATION,RETURNSTATION order by LEASESTATION";
+            String sql="select LEASESTATION,RETURNSTATION,count(bikenum) as nums from B_LEASEINFOHIS_SUM_PART partition(D"+date+") WHERE LEASESTATION != RETURNSTATION group by LEASESTATION,RETURNSTATION order by LEASESTATION";
             ps=con.prepareStatement(sql);
             rs=ps.executeQuery();
             while(rs.next()){
@@ -112,7 +112,7 @@ public class SqlHelper {
         JSONArray relations=new JSONArray();
         try {
             con= DBManager.getConnection();
-            String sql="select LEASESTATION,RETURNSTATION,count(bikenum) as nums from B_LEASEINFOHIS_SUM_PART WHERE leasedate BETWEEN ? AND ? group by LEASESTATION,RETURNSTATION order by LEASESTATION";
+            String sql="select LEASESTATION,RETURNSTATION,count(bikenum) as nums from B_LEASEINFOHIS_SUM_PART WHERE leasedate BETWEEN ? AND ? group by LEASESTATION,RETURNSTATION order by LEASESTATION,RETURNSTATION";
             ps=con.prepareStatement(sql);
             ps.setString(1,from);
             ps.setString(2,to);
@@ -161,8 +161,8 @@ public class SqlHelper {
         try {
             con= DBManager.getConnection();
             String sql="select LEASESTATION,RETURNSTATION,count(bikenum) as nums from B_LEASEINFOHIS_SUM_PART " +
-                    "WHERE (leasedate BETWEEN ? AND ?) AND "+getRange("LEASESTATION", list)+" AND "+getRange("RETURNSTATION", list)+
-                    " group by LEASESTATION,RETURNSTATION order by LEASESTATION";
+                    "WHERE (leasedate BETWEEN ? AND ?) AND ("+getRange("LEASESTATION", list)+") AND ("+getRange("RETURNSTATION", list)+
+                    ") group by LEASESTATION,RETURNSTATION order by LEASESTATION";
             ps=con.prepareStatement(sql);
             ps.setString(1,bfrom);
             ps.setString(2,bto);
@@ -373,7 +373,6 @@ public class SqlHelper {
     public static JSONArray getRelations(TreeMap<String,ArrayList<String>> map, String day) {
         int len = map.size();
         ArrayList<String> lease,retn;
-        String lease_id,retn_id;
         JSONArray relations = new JSONArray();
         JSONObject relation;
         con= DBManager.getConnection();

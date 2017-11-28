@@ -12,7 +12,7 @@ import java.util.*;
  * Created by Alien on 2017/4/12.
  */
 public class ReadLines {
-    static String path = "C:\\Users\\Alien\\Documents\\relations\\";
+    static String path = "F:\\codes\\Cluster\\";
     public static void generate(String from,String to) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null,dt2 = null;
@@ -23,7 +23,9 @@ public class ReadLines {
             e.printStackTrace();
         }
         int len = (int)(dt2.getTime()-dt.getTime())/(60*60*1000*24);
-        System.out.println(len);
+        System.out.println("选择的天数为："+(len+1));
+        System.out.println("开始生成关系文件...");
+        System.out.println("................");
         Calendar time = Calendar.getInstance();
         time.setTime(dt);
         String name,date;
@@ -34,8 +36,8 @@ public class ReadLines {
             stations = SqlHelper.getStationsArray(date);
             array = SqlHelper.getRelations(date);
             date = date.replaceAll("2014|-","");
-            System.out.println(stations);
             name = "byday_"+date+".net";
+            System.out.println("开始生成关系文件\""+name+"\"...");
             File file;
             try {
                 file = new File(path+name);
@@ -60,10 +62,13 @@ public class ReadLines {
                 bw.flush();
                 bw.close();
                 time.add(Calendar.DAY_OF_YEAR, 1);
+                System.out.println("生成关系文件\""+name+"\"成功");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        System.out.println("................");
+        System.out.println("生成所有关系文件成功");
     }
     public static void undirGenerate(String from,String to) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -86,7 +91,6 @@ public class ReadLines {
             stations = SqlHelper.getStationsArray(date);
             array = SqlHelper.getRelations(date);
             date = date.replaceAll("2014|-","");
-            System.out.println(stations);
             name = "undir_byday_"+date+".net";
             File file;
             try {
@@ -131,10 +135,15 @@ public class ReadLines {
         String date = from.replaceAll("2014|-","") + "_" + to.replaceAll("2014|-","");
         ArrayList<String> stations;
         JSONArray array;
+        long a = System.currentTimeMillis();
         stations = SqlHelper.getStationsArrayBlock(from,to);
         array = SqlHelper.getRelationsBlock(from, to);
-        System.out.println(stations);
+        long b = System.currentTimeMillis();
+        System.out.println("查询数据库耗时："+(b-a)+"ms");
+        a = System.currentTimeMillis();
         name = "byday_"+date+".net";
+        System.out.println("开始生成关系文件\""+name+"\"...");
+        System.out.println("................");
         File file;
         try {
             file = new File(path+name);
@@ -158,6 +167,9 @@ public class ReadLines {
             }
             bw.flush();
             bw.close();
+            b = System.currentTimeMillis();
+            System.out.println("生成关系文件\""+name+"\"成功");
+            System.out.println("生成文件耗时："+(b-a)+"ms");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -208,6 +220,15 @@ public class ReadLines {
         }
     }
     public static void generateBlock(String from,String to,String num,String[] points) {
+        class SortByLease implements Comparator {
+            @Override
+            public int compare(Object o1, Object o2) {
+                String[] str1 = (String[]) o1;
+                String[] str2 = (String[]) o2;
+                if(Integer.parseInt(str1[0]) > Integer.parseInt(str2[0])) return 1;
+                return -1;
+            }
+        }
         String name;
         String date = "";
         if (from.equals(to)) {
@@ -233,13 +254,18 @@ public class ReadLines {
                 bw.write((i+1)+" \""+stations.get(i)+"\"");
                 bw.newLine();
             }
-            bw.write("*Arcs "+array.length()+"\r\n");
+            bw.write("*Arcs "+array.length());
+            ArrayList<String[]> relArr = new ArrayList<>();
             for (int j = 0; j < array.length(); j++) {
                 int lease = stations.indexOf(array.getJSONObject(j).getString("lease"))+1;
                 int ret = stations.indexOf(array.getJSONObject(j).getString("return"))+1;
                 String nums = array.getJSONObject(j).getString("nums");
-                bw.write(lease+" "+ret+" "+nums);
+                relArr.add(new String[]{ String.valueOf(lease), String.valueOf(ret), nums });
+            }
+            Collections.sort(relArr, new SortByLease());
+            for (int i = 0; i < relArr.size(); i++) {
                 bw.newLine();
+                bw.write(relArr.get(i)[0]+" "+relArr.get(i)[1]+" "+relArr.get(i)[2]);
             }
             bw.flush();
             bw.close();
@@ -285,8 +311,8 @@ public class ReadLines {
         }
     }
 
-    public static ArrayList<String> getVertices(String date) {
-        String name_net = "byday_"+date+".net";
+    public static ArrayList<String> getVertices(String fileName) {
+        String name_net = fileName+".net";
         String vertice;
         ArrayList<String> vertices = new ArrayList<>();
         File file_net = new File(path+name_net);
@@ -310,9 +336,9 @@ public class ReadLines {
         }
         return vertices;
     }
-    public static TreeMap getCollection(String date) {
-        String name_clu = "byday_"+date+".clu";
-        String name_net = "byday_"+date+".net";
+    public static TreeMap<String, ArrayList<String>> getCollection(String fileName) {
+        String name_clu = fileName+".clu";
+        String name_net = fileName+".net";
         String col;
         int len = 0;
         ArrayList<String> collection = new ArrayList<>();
@@ -327,7 +353,6 @@ public class ReadLines {
         try {
             fr = new FileReader(file_clu);
             br = new BufferedReader(fr);
-            col = br.readLine();
             while((col = br.readLine())!=null) {
                 if(col.equals("")) {
                     continue;
@@ -339,8 +364,8 @@ public class ReadLines {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ArrayList<String> vertices = getVertices(date);
-        TreeMap scatter = new TreeMap();
+        ArrayList<String> vertices = getVertices(fileName);
+        TreeMap<String, ArrayList<String>> scatter = new TreeMap();
         for (int i=1;i<=len;i++) {
             ArrayList<String> array = new ArrayList<>();
             for (int j = 0; j < collection.size(); j++) {
@@ -349,6 +374,48 @@ public class ReadLines {
                 }
             }
             scatter.put(String.valueOf(i),array);
+        }
+        return scatter;
+    }
+
+    public static TreeMap<String, ArrayList<String>> getCollectionFromFile(String fileName) {
+        String name_clu = fileName+".clu";
+        String name_net = fileName+".net";
+        String col;
+        TreeMap<String, ArrayList<String>> scatter = new TreeMap();
+        File file_clu = new File(path+name_clu);
+        File file_net = new File(path+name_net);
+        if (!file_clu.exists() || !file_net.exists()) {
+            System.out.println("file "+name_clu+" does not exist or file "+name_net+" does not exist!");
+            return null;
+        }
+        ArrayList<String> vertices = getVertices(fileName);
+        ArrayList<String> collection = new ArrayList<>();
+        FileReader fr;
+        BufferedReader br;
+        try {
+            fr = new FileReader(file_clu);
+            br = new BufferedReader(fr);
+            while((col = br.readLine())!=null) {
+                if(col.equals("")) {
+                    continue;
+                }
+                collection.add(col.replaceAll("\\d*:|\\[|\\]|\\s*|'", ""));
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int len = vertices.size();
+        for (int i = 0; i < collection.size(); i++) {
+            String[] line = collection.get(i).split(",");
+            System.out.println(line[line.length-1]);
+            System.out.println(line[line.length-2]);
+            ArrayList<String> colList = new ArrayList<>();
+            for (int j = 0; j < line.length; j++) {
+                colList.add(vertices.get(Integer.parseInt(line[j])-1));
+            }
+            scatter.put(String.valueOf(i+1), colList);
         }
         return scatter;
     }

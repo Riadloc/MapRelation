@@ -26,10 +26,22 @@
     }
 
     function createMap() {
-        let map = new BMap.Map("map",{});
-        let point = new BMap.Point(120.16711642992,30.25283633644);
+        const map = new BMap.Map("map",{});
+        const point = new BMap.Point(120.16711642992,30.25283633644);
         map.centerAndZoom(point, 15);
-        map.setMapStyle({style:'grayscale'});
+
+        const styleJson = [
+            {
+                "featureType": "all",
+                "elementType": "all",
+                "stylers": {
+                    "lightness": 10,
+                    "saturation": -100
+                }
+            }
+        ];
+
+        map.setMapStyle({styleJson});
         window.map = map;
     }
 

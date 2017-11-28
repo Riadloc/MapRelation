@@ -1,6 +1,6 @@
 .tabs-vertical ul{
 	text-align: center;
-	line-height: 40px;
+	line-height: 50px;
 	list-style: none;
 }
 
@@ -12,6 +12,7 @@
 
 .tabs-vertical {
 	display: flex;
+	box-shadow: 0 0 8px 4px #333;
 }
 
 .tabs-vertical .tabs-nav {
@@ -24,15 +25,16 @@
 	padding: 10px;
 	color: #fff;
 	box-sizing: border-box;
-	background-color: #292929;
+	background-color: #333;
 }
 
 .tabs-nav>li {
 	cursor: pointer;
+	height: 50px;
 }
 
 .tabs-nav .tab-active {
-	background-color: #0277bd;
+	background-color: #333;
 }
 
 .tabs-nav .tab-active a {
@@ -41,6 +43,7 @@
 
 .tabs-content>div {
 	min-height: 200px;
+	overflow: hidden;
 	display: none;
 }
 

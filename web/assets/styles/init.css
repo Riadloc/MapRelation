@@ -39,28 +39,31 @@ label {
 }
 
 button,.ui_button {
-    color: #fff!important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    color: #fff;
     font-size: 14px;
     height: 32px;
     line-height: 32px;
-    padding: 0 8px;
-    background: #0277bd;
-    outline: none;
+    padding: 0 20px;
+    margin-right: 5px;
     cursor: pointer;
-    border: 1px solid #0277bd;
-    -webkit-box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 6px, rgba(0, 0, 0, 0.117647) 0 1px 4px;
-    -moz-box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 6px, rgba(0, 0, 0, 0.117647) 0 1px 4px;
-    box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 6px, rgba(0, 0, 0, 0.117647) 0 1px 4px;
+    border: none;
+    outline: none;
+    border-radius: 16px;
+    background: #3F51B5;
+    box-sizing: border-box;
+    transition: all .3s cubic-bezier(.2, 3, .4, 1);
 }
 
 button:hover,.ui_button:hover {
-    background: #039be5;
+    background-color: #5066de;
 }
 
 .ui_button {
     display: inline-block;
     vertical-align: middle;
-    line-height: 30px;
 }
 
 input[type="text"],input[type="number"] {

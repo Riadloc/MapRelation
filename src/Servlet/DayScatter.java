@@ -28,7 +28,8 @@ public class DayScatter extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String day = request.getParameter("day");
-        TreeMap map = ReadLines.getCollection(day);
+        String fileName = request.getParameter("fileName");
+        TreeMap map = ReadLines.getCollection(fileName);
         JSON markers = net.sf.json.JSONArray.fromObject(map);
         System.out.println(markers);
         JSONArray relations = SqlHelper.getScatRels(map,day);
