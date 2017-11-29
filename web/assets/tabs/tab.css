@@ -5,7 +5,7 @@
 }
 
 .tabs-vertical a{
-	color: #656a6d;
+	color: #333;
 	text-decoration: none;
 	outline: none;
 }
@@ -23,6 +23,7 @@
 .tabs-vertical .tabs-content {
 	flex: 1;
 	padding: 20px 16px;
+	min-height: 220px;
 	color: #fff;
 	box-sizing: border-box;
 	background-color: #333;

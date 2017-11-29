@@ -3,44 +3,56 @@
  * 基本事件
  */
 (function () {
-    var myChart= null,colors=[],size,time= null,sign= null,oldcores= [],trace= [],tmplines=[],scatters= [],relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
+    var positions = [],myChart,colors=[],size,oldcores= [],trace= [],tmplines=[],scatters= [],relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
 
     (function initialize() {
+        getPositions();
         initialDefinite();
         bindListener();
         addSubWay();
     })();
 
-    function initialDefinite() {
-        sign = false;
-        myChart = echarts.init($('.histogram')[0], 'dark');
-        colors= [red, purple, blue, limeA700, yellow600, orange600, indigoA400, cyanA200, pink, pink200, greenA200, blue200, brown600,
-            yellow300, lime900, deepOrange400, green900, purple900, red900, orange200, redA100, pink900, cyan200, cyan900, lime400, lightBlue900, deepPurpleA200, green400, brown200, deepPurple200,
-            indigo900, indigo100,indigo300,blueGrey700 ,grey700,grey400,black,deepOrange200];
-        size = [BMAP_POINT_SIZE_SMALL,BMAP_POINT_SIZE_NORMAL,BMAP_POINT_SIZE_BIG,BMAP_POINT_SIZE_BIGGER,BMAP_POINT_SIZE_HUGE],
-            $(".fromDate").flatpickr({
-                minDate: "2014-03-01",
-                maxDate: "2014-06-22"
-            });
-        $(".toDate").flatpickr({
-            minDate: "2014-03-02",
-            maxDate: "2014-06-23"
-        });
-        $(".the-day").flatpickr({
-            minDate: "2014-03-01",
-            maxDate: "2014-06-23"
+    function getPositions() {
+        $.ajax({
+            url: '/data',
+            type: 'get',
+            timeout: 60000,
+            success: function (res) {
+                // console.log(res);
+                let arr = res.split("@");
+                positions = JSON.parse(arr[0]);
+                window.positions = positions;
+            },
+            error: function () {
+                layer.alert("获取站点数据失败！\n请刷新网页或检查网络！")
+            }
         });
     }
 
+    function initialDefinite() {
+        // 构造图表
+        $('.charts').show();myChart = echarts.init($('.histogram')[0], 'dark');$('.charts').hide();
+        // 颜色数组
+        colors= [red, purple, blue, limeA700, yellow600, orange600, indigoA400, cyanA200, pink, pink200, greenA200, blue200, brown600,
+            yellow300, lime900, deepOrange400, green900, purple900, red900, orange200, redA100, pink900, cyan200, cyan900, lime400, lightBlue900, deepPurpleA200, green400, brown200, deepPurple200,
+            indigo900, indigo100,indigo300,blueGrey700 ,grey700,grey400,black,deepOrange200];
+        // 海量点大小数组
+        size = [BMAP_POINT_SIZE_SMALL,BMAP_POINT_SIZE_NORMAL,BMAP_POINT_SIZE_BIG,BMAP_POINT_SIZE_BIGGER,BMAP_POINT_SIZE_HUGE];
+        // 初始化日期选择
+        $(".fromDate").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-22"});
+        $(".toDate").flatpickr({minDate: "2014-03-02", maxDate: "2014-06-23"});
+        $(".the-day").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-23"});
+    }
+    // 绑定事件
     function bindListener() {
         $(".day").click(() => generateFilesByTime("day"));                      //有向-生成关系文件[天]
         $(".block").click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
         $(".undir-day").click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
         $(".undir-block").click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
-        $("#tab1").find(".day—scatter").click(() => addScatter("day"));           //聚类散点
-        $("#tab1").find(".day-core").click(() => addCore("day"));                     //聚类中心联系
-        $("#tab2").find(".day—scatter").click(() => addScatter("lv_day"));           //聚类散点
-        $("#tab2").find(".day-core").click(() => addCore("lv_day"));                 //聚类中心联系
+        $("#infomap").find(".day—scatter").click(() => addScatter());           //聚类散点
+        $("#infomap").find(".day-core").click(() => addCore());                     //聚类中心联系
+        $("#louvain").find(".day—scatter").click(() => addScatter());           //聚类散点
+        $("#louvain").find(".day-core").click(() => addCore());                 //聚类中心联系
         $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
         $(".cluster").click(() =>  generateFilesByTime("cluster"));      //生成聚类关系文件
         $(".louvain_cluster").click(() => getCommunity());      //生成聚类关系文件
@@ -48,7 +60,7 @@
         $(".day—scatter-filter").click(function(){                             //聚类内散点联系
             if(checkHasUpload()) return false;
             Common.clearMap();
-            $(".loading").show();
+            $(".loading-field").show();
             let id = trace[0];
             addCurvlines(relations[id],null);
         });
@@ -320,9 +332,9 @@
         }
     }
 
-    function addScatter(type) {
+    function addScatter() {
         if (!checkHasUpload()) return false;
-        Scatter(type, function () {
+        Scatter('scatter', function () {
             let color = Common.color();
             getScatter(scatters).forEach(function (item,index) {
                 let options = {
@@ -334,20 +346,21 @@
                 //     cores = getCore(scatters);
                 // }
             });
-            $(".loading").hide();
+            $(".loading-field").hide();
         });
     }
 
-    function addCore(type) {
+    function addCore() {
         if (!checkHasUpload()) return false;
         let options = null;
         $('.charts').show();myChart.showLoading();
-        Core(type, function () {
+        Core(function () {
             clearOverlays();
             let color = Common.color();
             let distance = Common.getDistance();
             showHistogram();
-            if (["day", "lv_day"].includes(type)) {
+            // if (["day", "lv_day"].includes(type))
+            {
                 cores.forEach(function (item,index) {
                     options = {
                         color: color[index%38],
@@ -355,16 +368,17 @@
                     };
                     Marker([item],options);
                 });
-            } else {
-                cores.forEach(function (item,index) {
-                    let idx = selScatter[index];
-                    options = {
-                        color: color[idx%38],
-                        size: size[Common.getSize(idx,distance)]
-                    };
-                    Marker([item],options);
-                });
             }
+            // else {
+            //     cores.forEach(function (item,index) {
+            //         let idx = selScatter[index];
+            //         options = {
+            //             color: color[idx%38],
+            //             size: size[Common.getSize(idx,distance)]
+            //         };
+            //         Marker([item],options);
+            //     });
+            // }
             addCurvlines(curvelines, cores);
         });
     }
@@ -372,115 +386,72 @@
     function addScatterRels() {
         if (!checkHasUpload()) return false;
         let color = Common.color();
-        Scatter("cluster", function () {
+        Scatter("sel_cluster", function () {
             Common.clearMap();
             for (let key in relations) {
                 let idx = key.split('-');
                 console.log(idx);
                 addCurvlines(relations[key],null,[color[idx[0]-1], color[idx[1]-1]]);
             }
-            $(".loading").hide();
+            $(".loading-field").hide();
         });
     }
 
-    function Scatter(type,fun) {
-        let src,params;
-        $(".loading").show();
-        Common.clearMap();
-        // if (time == Common.getTime()) {
-        //     fun();
-        //     return;
-        // } else {
-        time = Common.getTime();
-        const fileName = Common.getFileName();
-        // }
-        switch(type) {
-            case "day": {
-                src = "/dayscatter";
-                params = {
-                    day: time,
-                    fileName: fileName
-                };
-                break;
-            }
-            case "cluster": {
-                src = "/scaRel";
-                params = {
-                    day: time,
-                    idArray: selScatter.toString(),
-                    fileName: fileName
-                };
-                break;
-            }
-            case "hour": {
-                src = "/hourscatter";
-                params = {
-                    hour: time,
-                    fileName: fileName
-                };
-                break;
-            }
-            case "lv_day": {
-                src = "/louvain";
-                params = {
-                    day: time,
-                    fileName: fileName,
-                    type: 'scatter'
-                };
-                break;
-            }
-        }
-        $.get(src,params).then((res) => {
-            res = res.split("@");
-            scatters = JSON.parse(res[0])[0];
-            relations = JSON.parse(res[1])[0];
-            fun();
-        }).catch((e) => {
-            layer.msg("获取聚类散点失败！");
-            $(".loading").hide();
-        })
-    }
-
-    function Core(type,fun) {
-        let src,params;
-        $(".loading").show();
+    function loadAjax(data) {
+        const content = data.content;
         Common.clearMap();
         const time = Common.getTime();
         const fileName = Common.getFileName();
-        switch(type) {
-            case "day": {
-                src = "/daycore";
-                params = {
-                    day: time,
-                    fileName: fileName
-                };
-                break;
+        $(".loading-field").show();
+        content.day = time;
+        content.fileName = fileName;
+        $.ajax({
+            url: data.url,
+            type: 'POST',
+            data: content,
+            timeout: 60000,
+            contentType: "application/x-www-form-urlencoded",
+            success: function(res) {
+                data.success(res);
+            },
+            error: function (e) {
+                layer.msg("获取聚类散点失败！");
+                $(".loading-field").hide();
             }
-            case "hour": {
-                src = "/hourcore";
-                params = {
-                    day: "2014-04-05",
-                    hour: time,
-                    fileName: fileName
-                };
-                break;
-            }
-            case "lv_day": {
-                src = "/louvain";
-                params = {
-                    day: time,
-                    fileName: fileName,
-                    type: 'cluster'
-                };
-                break;
-            }
-        }
-        $.get(src,params).then((res) => {
-            res = res.split("@");
-            scatters = JSON.parse(res[0])[0];
-            curvelines = JSON.parse(res[1]);
-            fun();
         })
+    }
+
+    function Scatter(type,fun) {
+        let content = {};
+        content.comm_type = $(".tab-active").attr("data-name");
+        if (type === "sel_cluster") content.idArray = selScatter.toString();
+        content.func_type = type;
+        loadAjax({
+            url: '/community',
+            content: content,
+            success: function (res) {
+                res = res.split("@");
+                scatters = JSON.parse(res[0])[0];
+                relations = JSON.parse(res[1])[0];
+                fun();
+            }
+        });
+    }
+
+    function Core(fun) {
+        let content = {};
+        content.func_type = 'cluster';
+        content.comm_type = $(".tab-active").attr("data-name");
+        loadAjax({
+            url: '/community',
+            content: content,
+            success: function (res) {
+                res = res.split("@");
+                scatters = JSON.parse(res[0])[0];
+                curvelines = JSON.parse(res[1]);
+                fun();
+            }
+        });
     }
 
     function getScatter(points) {
@@ -525,7 +496,7 @@
         Common.clearMap();
         selScatter.length = 0;
         if (!checkHasUpload()) return false;
-        Scatter("day", function () {
+        Scatter("scatter", function () {
             let color = Common.color();
             let distance = Common.getDistance();
             cores.forEach(function (item,index) {
@@ -534,7 +505,7 @@
                     size: size[Common.getSize(index+1,distance)]
                 }, "select");
             });
-            $(".loading").hide();
+            $(".loading-field").hide();
         });
     }
 
@@ -725,7 +696,7 @@
             }
             return Math.max(...maxArr);
         }
-        $(".loading").hide();
+        $(".loading-field").hide();
     }
 
     function showHistogram() {

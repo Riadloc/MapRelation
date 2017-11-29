@@ -26,7 +26,8 @@ public class ScaRel extends HttpServlet {
         String day = request.getParameter("day");
         String[] idArray = request.getParameter("idArray").split(",");
         String fileName = request.getParameter("fileName");
-        TreeMap map = ReadLines.getCollection(fileName);
+        String comm_type = request.getParameter("comm_type");
+        TreeMap map = ReadLines.getCollection(fileName, comm_type);
         TreeMap newMap = new TreeMap();
         for (int i=0;i<idArray.length;i++) {
             newMap.put(idArray[i],map.get(idArray[i]));

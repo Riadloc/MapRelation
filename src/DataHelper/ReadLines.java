@@ -1,5 +1,6 @@
 package DataHelper;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -12,7 +13,7 @@ import java.util.*;
  * Created by Alien on 2017/4/12.
  */
 public class ReadLines {
-    static String path = "E:\\ColdAir\\relations\\";
+    static String path = "E:\\ColdAir\\infomap\\";
     public static void generate(String from,String to) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null,dt2 = null;
@@ -336,8 +337,8 @@ public class ReadLines {
         }
         return vertices;
     }
-    public static TreeMap<String, ArrayList<String>> getCollection(String fileName) {
-        String name_clu = fileName+".clu";
+    public static TreeMap<String, ArrayList<String>> getCollection(String fileName, String type) {
+        String name_clu = type + "_" + fileName+".clu";
         String name_net = fileName+".net";
         String col;
         int len = 0;
@@ -354,11 +355,10 @@ public class ReadLines {
             fr = new FileReader(file_clu);
             br = new BufferedReader(fr);
             while((col = br.readLine())!=null) {
-                if(col.equals("")) {
-                    continue;
+                if(!col.equals("") && StringUtils.isNumeric(col)) {
+                    len = len>Integer.parseInt(col)?len:Integer.parseInt(col);
+                    collection.add(col);
                 }
-                len = len>Integer.parseInt(col)?len:Integer.parseInt(col);
-                collection.add(col);
             }
             br.close();
         } catch (Exception e) {
@@ -379,7 +379,7 @@ public class ReadLines {
     }
 
     public static TreeMap<String, ArrayList<String>> getCollectionFromFile(String fileName) {
-        String name_clu = fileName+".clu";
+        String name_clu = "louvain_"+fileName+".clu";
         String name_net = fileName+".net";
         String col;
         TreeMap<String, ArrayList<String>> scatter = new TreeMap();

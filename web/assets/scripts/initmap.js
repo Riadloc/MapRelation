@@ -3,25 +3,11 @@
  * 初始化地图
  */
 (function(){
-    var positions = [];
-    function getPostions() {
-        $.ajax({
-            url: '/data',
-            type: 'get',
-            async: false,
-            success: function (res) {
-                // console.log(res);
-                let arr = res.split("@");
-                positions = JSON.parse(arr[0]);
-                window.positions = positions;
-            }
-        });
-    }
+
     function initialize() {
         createMap();        //创建地图
         setMapEvent();      //设置地图事件
         addMapControl();    //增加地图控件
-        getPostions();      //获取数据
         // addMarker(positions,map);   //加载海量点
     }
 

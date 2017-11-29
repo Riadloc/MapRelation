@@ -11,25 +11,27 @@
     <script src="http://api.map.baidu.com/api?v=2.0&ak=E9Af9IGwyGDRXMv1lThzQcxCdPchzw9c"></script>
     <script src="./assets/scripts/jquery-3.1.1.min.js"></script>
     <script src="./assets/layer/layer.js"></script>
-    <script src="./assets/scripts/colors.js"></script>
     <script src="http://cdn.bootcss.com/d3/4.8.0/d3.js"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/library/CurveLine/1.5/src/CurveLine.min.js"></script>
-    <script src="http://cdn.bootcss.com/echarts/3.5.3/echarts.js"></script>
+    <script src="./assets/scripts/CurveLine.min.js"></script>
+    <script src="./assets/scripts/echarts.min.js"></script>
 </head>
 <body>
 <div id="app">
     <header><h1>自行车站点</h1></header>
     <div class="wrapper">
         <div id="map"></div>
+        <div class="loading-field">
+            <div class="loading-img"><img src="./assets/images/bike.svg" alt=""></div>
+        </div>
         <div class="tabs-vertical">
             <ul class="tabs-nav">
-                <li data-index="0" class="tab-active"><a href="#tab1" data-toggle="tab">INFOMAP</a></li>
-                <li data-index="1"><a href="#tab2" data-toggle="tab">LOUVAIN</a></li>
-                <li data-index="2"><a href="#tab3" data-toggle="tab">关系文件|有向</a></li>
-                <li data-index="3"><a href="#tab4" data-toggle="tab">关系文件|无向</a></li>
+                <li data-index="0" class="tab-active" data-name="infomap"><a href="#infomap" data-toggle="tab">INFOMAP</a></li>
+                <li data-index="1" data-name="louvain"><a href="#louvain" data-toggle="tab">LOUVAIN</a></li>
+                <li data-index="2"><a href="#net_direct" data-toggle="tab">关系文件|有向</a></li>
+                <li data-index="3"><a href="#net_undirect" data-toggle="tab">关系文件|无向</a></li>
             </ul>
             <div class="tabs-content">
-                <div class="tab-content-active" id="tab1">
+                <div class="tab-content-active" id="infomap">
                     <div class="days-option clearfix">
                         <span><label>开始:</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
                         <span><label>结束:</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
@@ -54,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="tab2" class="tab-pane">
+                <div id="louvain" class="tab-pane">
                     <div class="days-option clearfix">
                         <span><label>开始:</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
                         <span><label>结束:</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
@@ -73,7 +75,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="tab3">
+                <div id="net_direct">
                     <div class="days-option clearfix">
                         <span><label>开始:</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
                         <span><label>结束:</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
@@ -83,7 +85,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="options-area tab-pane" id="tab4">
+                <div class="options-area tab-pane" id="net_undirect">
                     <div class="days-option clearfix">
                         <span><label>开始:</label><input type="text" class="fromDate from2" value="2014-04-05"/></span>
                         <span><label>结束:</label><input type="text" class="toDate to2" value="2014-04-07"/></span>
@@ -108,17 +110,18 @@
                 <div>0</div>
             </div>
         </div>
-        <div class="loading">
-            <div class="loading-a" ></div>
-            <div class="loading-b" ></div>
-            <div class="loading-c" ></div>
-            <div class="loading-d" ></div>
-        </div>
+        <!--<div class="loading">-->
+            <!--<div class="loading-a" ></div>-->
+            <!--<div class="loading-b" ></div>-->
+            <!--<div class="loading-c" ></div>-->
+            <!--<div class="loading-d" ></div>-->
+        <!--</div>-->
     </div>
 </div>
 <script src="./assets/scripts/flatpickr.js"></script>
 <script src="./assets/scripts/dark.js"></script>
 <script src="./assets/scripts/initmap.js"></script>
+<script src="./assets/scripts/colors.js"></script>
 <script src="./assets/scripts/base.js"></script>
 <script src="./assets/tabs/tab.js"></script>
 </body>
