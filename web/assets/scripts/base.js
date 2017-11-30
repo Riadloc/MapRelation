@@ -12,23 +12,6 @@
         addSubWay();
     })();
 
-    function getPositions() {
-        $.ajax({
-            url: '/data',
-            type: 'get',
-            timeout: 120000,
-            success: function (res) {
-                // console.log(res);
-                let arr = res.split("@");
-                positions = JSON.parse(arr[0]);
-                window.positions = positions;
-            },
-            error: function (e) {
-                layer.alert("获取站点数据失败！\n请刷新网页或检查网络！")
-            }
-        });
-    }
-
     function initialDefinite() {
         // 构造图表
         $('.charts').show();myChart = echarts.init($('.histogram')[0], 'dark');$('.charts').hide();
@@ -52,15 +35,15 @@
         $(".day—scatter").click(() => addScatter());           //聚类散点
         $(".day-core").click(() => addCore());                     //聚类中心联系
         $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
-        $(".cluster").click(() =>  generateFilesByTime("cluster"));      //生成聚类关系文件
+        $(".cluster").click(() => generateFilesByTime("cluster"));      //生成聚类关系文件
         $(".louvain_cluster").click(() => getCommunity());      //生成聚类关系文件
         $(".select-scatter").click(() => selectScatter());              //聚类中心选择
-        $(".day—scatter-filter").click(function(){                             //聚类内散点联系
-            if(checkHasUpload()) return false;
+        $(".day—scatter-filter").click(function () {                             //聚类内散点联系
+            if (checkHasUpload()) return false;
             Common.clearMap();
             $(".loading-field").show();
             let id = trace[0];
-            addCurvlines(relations[id],null);
+            addCurvlines(relations[id], null);
         });
         // $('#xFile').change(function(e){
         //     $("#IFile").text(e.currentTarget.files[0].name);
@@ -72,7 +55,7 @@
         // });
         $('.file-load input[type="file"]').change(function (e) {
             clearOverlays();
-            if((!!cores.length) && (!oldcores.length)) {
+            if ((!!cores.length) && (!oldcores.length)) {
                 oldcores = cores;
                 cores = [];
             }
@@ -83,6 +66,37 @@
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
         })
     }
+    // 绘制地铁一号线
+    function addSubWay() {
+        let points = [
+            [[120.354264,30.316329],[120.341868,30.315456]],[[120.341221,30.315425],[120.332328,30.315347]],[[120.331735,30.315362],[120.319284,30.31569]],[[120.318745,30.315721],[120.285185,30.31689]],[[120.284897,30.31689],[120.282094,30.31664],[120.274549,30.313835],[120.273183,30.313772]],[[120.273183,30.313772],[120.268117,30.313866],[120.261541,30.31293],[120.259026,30.312026]],[[120.258595,30.311777],[120.247815,30.30657]],[[120.247384,30.306344],[120.234161,30.301332],[120.23028,30.300396]],[[120.229633,30.300241],[120.221225,30.298183],[120.214398,30.294441],[120.199342,30.290324]],[[120.198678,30.290106],[120.197708,30.289794],[120.194761,30.28967],[120.187323,30.29101],[120.18373,30.290886]],[[120.183155,30.290886],[120.178879,30.290168],[120.175897,30.289171],[120.173238,30.287705],[120.172268,30.287011],[120.172268,30.286075]],[[120.172268,30.285576],[120.172375,30.281335],[120.170112,30.276563],[120.17004,30.275752],[120.170255,30.26861]],[[120.170291,30.268111],[120.170507,30.26078]],[[120.170579,30.26025],[120.170902,30.254978],[120.172232,30.25267],[120.173489,30.251765],[120.174064,30.251703]],[[120.174567,30.251671],[120.183766,30.251297],[120.186497,30.250767],[120.187323,30.250268]],[[120.18779,30.249987],[120.197205,30.242905]],[[120.1976,30.242499],[120.203672,30.237164]],[[120.204139,30.236727],[120.213087,30.227444],[120.222824,30.216163],[120.222896,30.215726]],[[120.223004,30.215188],[120.223974,30.206074]],[[120.224046,30.205513],[120.225447,30.195243],[120.226489,30.193745],[120.226956,30.193464]],[[120.227388,30.193183],[120.228034,30.192746],[120.235652,30.191029],[120.237017,30.19003]],[[120.237449,30.189718],[120.241006,30.186222],[120.24,30.182101],[120.240718,30.174226]]
+        ];
+        points.forEach(item => {
+            let pointsArr = item.map(point => new BMap.Point(point[0], point[1]));
+            let polyline = new BMap.Polyline(pointsArr, {
+                strokeColor: '#DC0000', strokeWeight: 2, strokeOpacity: 1
+            });
+            map.addOverlay(polyline);
+        });
+    }
+    // 后端获取站点数据
+    function getPositions() {
+        $.ajax({
+            url: '/data',
+            type: 'get',
+            timeout: 120000,
+            success: function (res) {
+                // console.log(res);
+                let arr = res.split("@");
+                positions = JSON.parse(arr[0]);
+                window.positions = positions;
+            },
+            error: function (e) {
+                layer.alert("获取站点数据失败！\n请刷新网页或检查网络！")
+            }
+        });
+    }
+
     // 检查是否上传文件
     function checkHasUpload() {
         const active = $(".tab-active").find("a").attr("href");
@@ -93,6 +107,7 @@
         return true;
     }
 
+    // 获取Louvain的Level数
     function getLouvainLevelNum() {
         const fileName = Common.getFileName();
         $.ajax({
@@ -117,29 +132,19 @@
         })
     }
 
-    function addSubWay() {
-        let points = [
-            [[120.354264,30.316329],[120.341868,30.315456]],[[120.341221,30.315425],[120.332328,30.315347]],[[120.331735,30.315362],[120.319284,30.31569]],[[120.318745,30.315721],[120.285185,30.31689]],[[120.284897,30.31689],[120.282094,30.31664],[120.274549,30.313835],[120.273183,30.313772]],[[120.273183,30.313772],[120.268117,30.313866],[120.261541,30.31293],[120.259026,30.312026]],[[120.258595,30.311777],[120.247815,30.30657]],[[120.247384,30.306344],[120.234161,30.301332],[120.23028,30.300396]],[[120.229633,30.300241],[120.221225,30.298183],[120.214398,30.294441],[120.199342,30.290324]],[[120.198678,30.290106],[120.197708,30.289794],[120.194761,30.28967],[120.187323,30.29101],[120.18373,30.290886]],[[120.183155,30.290886],[120.178879,30.290168],[120.175897,30.289171],[120.173238,30.287705],[120.172268,30.287011],[120.172268,30.286075]],[[120.172268,30.285576],[120.172375,30.281335],[120.170112,30.276563],[120.17004,30.275752],[120.170255,30.26861]],[[120.170291,30.268111],[120.170507,30.26078]],[[120.170579,30.26025],[120.170902,30.254978],[120.172232,30.25267],[120.173489,30.251765],[120.174064,30.251703]],[[120.174567,30.251671],[120.183766,30.251297],[120.186497,30.250767],[120.187323,30.250268]],[[120.18779,30.249987],[120.197205,30.242905]],[[120.1976,30.242499],[120.203672,30.237164]],[[120.204139,30.236727],[120.213087,30.227444],[120.222824,30.216163],[120.222896,30.215726]],[[120.223004,30.215188],[120.223974,30.206074]],[[120.224046,30.205513],[120.225447,30.195243],[120.226489,30.193745],[120.226956,30.193464]],[[120.227388,30.193183],[120.228034,30.192746],[120.235652,30.191029],[120.237017,30.19003]],[[120.237449,30.189718],[120.241006,30.186222],[120.24,30.182101],[120.240718,30.174226]]
-        ];
-        points.forEach(item => {
-            let pointsArr = item.map(point => new BMap.Point(point[0], point[1]));
-            let polyline = new BMap.Polyline(pointsArr, {
-                strokeColor: '#DC0000', strokeWeight: 2, strokeOpacity: 1
-            });
-            map.addOverlay(polyline);
-        });
-    }
-
+    // 清理地图覆盖物（除了地铁一号线）
     function clearOverlays() {
         map.clearOverlays();
         addSubWay();
     }
 
+    // 显示加载图表
     function showLoading() {
         $('.charts').show();
         myChart.showLoading();
     }
 
+    // 公共函数
     var Common = {
         getTime() {
             // const time = $(".file-name").text();
@@ -193,7 +198,7 @@
             return weight;
         },
         color() {
-            cores = getCore(scatters);let colorize=[];
+            cores = handleCore(scatters);let colorize=[];
             if (!!oldcores.length) {
                 let len = oldcores.length;
                 let flag = new Array(len);
@@ -285,22 +290,7 @@
         }
     };
 
-    // function getCommunity() {
-    //     if ($("#louFile")[0].files[0]) {
-    //         const worker = new Worker("assets/scripts/community.js");
-    //         const file = $("#louFile")[0].files[0];
-    //         console.log(file);
-    //         worker.postMessage(file);
-    //         console.log('Message posted to worker');
-    //         worker.onmessage = function (e) {
-    //             const community = e.data;
-    //             console.log(community);
-    //         }
-    //     } else {
-    //         layer.msg("请上传net文件！")
-    //     }
-    // }
-
+    // 生成文件函数
     function generateFilesByTime(timeType) {
         let url,params;
         const active = $(".tab-active").find("a").attr("href");
@@ -346,7 +336,7 @@
                     params.from = time;
                     params.to = time;
                 }
-                $.post(url,params).then((res) => {console.log(res);}).catch((e) => console.log(e));
+                $.post(url,params).then((res) => {layer.success(res);}).catch((e) => layer.error(e));
                 break;
             }
         }
@@ -361,24 +351,25 @@
         }
     }
 
+    // 显示聚类散点
     function addScatter() {
         if (!checkHasUpload()) return false;
         Scatter('scatter', function () {
             let color = Common.color();
-            getScatter(scatters).forEach(function (item,index) {
+            handleScatter(scatters).forEach(function (item,index) {
                 let options = {
                     color: color[index%38],
                     size: size[1]
                 };
                 Marker(item, options, "info");
                 // if(!cores[0].length) {
-                //     cores = getCore(scatters);
+                //     cores = handleCore(scatters);
                 // }
             });
             $(".loading-field").hide();
         });
     }
-
+    // 显示聚类中心联系
     function addCore() {
         if (!checkHasUpload()) return false;
         let options = null;
@@ -388,7 +379,6 @@
             let color = Common.color();
             let distance = Common.getDistance();
             showHistogram();
-            // if (["day", "lv_day"].includes(type))
             {
                 cores.forEach(function (item,index) {
                     options = {
@@ -398,20 +388,11 @@
                     Marker([item],options);
                 });
             }
-            // else {
-            //     cores.forEach(function (item,index) {
-            //         let idx = selScatter[index];
-            //         options = {
-            //             color: color[idx%38],
-            //             size: size[Common.getSize(idx,distance)]
-            //         };
-            //         Marker([item],options);
-            //     });
-            // }
             addCurvlines(curvelines, cores);
         });
     }
 
+    //  部分聚类散点联系
     function addScatterRels() {
         if (!checkHasUpload()) return false;
         let color = Common.color();
@@ -426,6 +407,7 @@
         });
     }
 
+    // 后端获取数据公共接口
     function loadAjax(data) {
         const content = data.content;
         Common.clearMap();
@@ -450,6 +432,7 @@
         })
     }
 
+    // 获取散点及散点联系
     function Scatter(type,fun) {
         let content = {};
         content.comm_type = $(".tab-active").attr("data-name");
@@ -468,6 +451,7 @@
         });
     }
 
+    // 获取散点及聚类间联系
     function Core(fun) {
         let content = {};
         content.func_type = 'cluster';
@@ -484,8 +468,9 @@
             }
         });
     }
-
-    function getScatter(points) {
+    
+    // 处理散点数据
+    function handleScatter(points) {
         let father = [];
         for (let key in points) {
             let son = [];
@@ -502,7 +487,8 @@
         return father;
     }
 
-    function getCore(points) {
+    // 处理聚类中心数据
+    function handleCore(points) {
         let cores = [];
         scatIds.length = 0;
         for (let key in points) {
@@ -523,6 +509,7 @@
         return cores;
     }
 
+    // 选择聚类中心
     function selectScatter() {
         Common.clearMap();
         selScatter.length = 0;
@@ -540,10 +527,12 @@
         });
     }
 
+    // 用Circle覆盖物绘制的圆形覆盖物
     function newMarker(data, color) {
         map.addOverlay(new BMap.Circle(data,40,{fillColor:color,fillOpacity:0.8,strokeOpacity: 0.8,strokeWeight:0,strokeColor: color}));
     }
 
+    // 海量点加载方式绘制圆形覆盖物
     function Marker(data,options,type) {
         let pointCollection = getPointCollection(data,options);
         map.addOverlay(pointCollection);
@@ -590,6 +579,7 @@
             })(points);
         }
 
+        // 响应点击散点函数
         function showSelectEvent(points) {
             points.addEventListener("click", function (obj) {
                 let index = cores.indexOf(obj.point) + 1 + "";
@@ -613,11 +603,13 @@
         }
     }
 
+    // 加载弧线
     function addCurvlines(lines,cores,opt) {
         const active = $(".tab-active").find("a").attr("href");
         const filter = parseInt($(active).find(".filter").val());
         let maxnum = parseInt($(active).find(".max-num").text());
         const markers = new Set();
+        // 求站点联系关联度最大值
         if(Number.isNaN(maxnum) || opt) {
             maxnum = getMaxNum();
             $(".max-num").html(maxnum);
@@ -667,6 +659,7 @@
             });
             Marker(array, {color: colors[(id-1)%38], size: size[1]}, "info");
         }
+        // 绘制箭头函数
         function addArrow(lines,line_style) {
             //arrow
             // let lines = tmplines;
@@ -730,6 +723,7 @@
         $(".loading-field").hide();
     }
 
+    // 显示柱状图
     function showHistogram() {
         Common.initHistogram();
         let numbers = [],maxnum = 0;
@@ -773,6 +767,7 @@
         myChart.hideLoading();
     }
 
+    // 显示层叠柱状图
     function showStackChart(data) {
         Common.initStackChart();
         let legend = [], series = [];
