@@ -16,14 +16,14 @@
         $.ajax({
             url: '/data',
             type: 'get',
-            timeout: 60000,
+            timeout: 120000,
             success: function (res) {
                 // console.log(res);
                 let arr = res.split("@");
                 positions = JSON.parse(arr[0]);
                 window.positions = positions;
             },
-            error: function () {
+            error: function (e) {
                 layer.alert("获取站点数据失败！\n请刷新网页或检查网络！")
             }
         });
@@ -49,10 +49,8 @@
         $(".block").click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
         $(".undir-day").click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
         $(".undir-block").click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
-        $("#infomap").find(".day—scatter").click(() => addScatter());           //聚类散点
-        $("#infomap").find(".day-core").click(() => addCore());                     //聚类中心联系
-        $("#louvain").find(".day—scatter").click(() => addScatter());           //聚类散点
-        $("#louvain").find(".day-core").click(() => addCore());                 //聚类中心联系
+        $(".day—scatter").click(() => addScatter());           //聚类散点
+        $(".day-core").click(() => addCore());                     //聚类中心联系
         $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
         $(".cluster").click(() =>  generateFilesByTime("cluster"));      //生成聚类关系文件
         $(".louvain_cluster").click(() => getCommunity());      //生成聚类关系文件
@@ -64,21 +62,28 @@
             let id = trace[0];
             addCurvlines(relations[id],null);
         });
-        $('#xFile').change(function(e){
+        // $('#xFile').change(function(e){
+        //     $("#IFile").text(e.currentTarget.files[0].name);
+        //     console.log(e.currentTarget.files[0]);//e就是你获取的file对象
+        // });
+        // $('#louFile').change(function(e){
+        //     $("#LFile").text(e.currentTarget.files[0].name);
+        //     console.log(e.currentTarget.files[0]);//e就是你获取的file对象
+        // });
+        $('.file-load input[type="file"]').change(function (e) {
             clearOverlays();
             if((!!cores.length) && (!oldcores.length)) {
                 oldcores = cores;
                 cores = [];
             }
-            $("#IFile").text(e.currentTarget.files[0].name);
+            $(this).parents('.file-load').find(".file-name").text(e.currentTarget.files[0].name);
+            if ($(this).attr("id") === 'louFile') {
+                getLouvainLevelNum();
+            }
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
-        });
-        $('#louFile').change(function(e){
-            $("#LFile").text(e.currentTarget.files[0].name);
-            console.log(e.currentTarget.files[0]);//e就是你获取的file对象
-        });
+        })
     }
-
+    // 检查是否上传文件
     function checkHasUpload() {
         const active = $(".tab-active").find("a").attr("href");
         if ($(active).find('.file-name').text() === '选择上传net文件') {
@@ -86,6 +91,30 @@
             return false;
         }
         return true;
+    }
+
+    function getLouvainLevelNum() {
+        const fileName = Common.getFileName();
+        $.ajax({
+            url: '/getlevelnum',
+            type: 'POST',
+            data: {fileName: fileName},
+            timeout: 120000,
+            contentType: "application/x-www-form-urlencoded",
+            success: function(res) {
+                const level = parseInt(res, 10);
+                const $level_select = $("#louLevel");
+                if (level) {
+                    for (let i=1;i<=level;i++) {
+                        const node = $("<option value="+i+">"+i+"</option>")
+                        $level_select.append(node);
+                    }
+                }
+            },
+            error: function (e) {
+                layer.alert("获取失败！");
+            }
+        })
     }
 
     function addSubWay() {
@@ -325,7 +354,7 @@
         function generateTask(url,params) {
             $.get(url,params).then((res) => {
                 layer.msg('生成文件成功！');
-            }).catch((e) => layer.msg('生成文件失败！'))
+            }).catch((e) => layer.alert('生成文件失败！'))
         }
         if(timeType!='cluster') {
             generateTask(url,params);
@@ -409,13 +438,13 @@
             url: data.url,
             type: 'POST',
             data: content,
-            timeout: 60000,
+            timeout: 120000,
             contentType: "application/x-www-form-urlencoded",
             success: function(res) {
                 data.success(res);
             },
             error: function (e) {
-                layer.msg("获取聚类散点失败！");
+                layer.alert("获取聚类散点失败！");
                 $(".loading-field").hide();
             }
         })
@@ -425,6 +454,7 @@
         let content = {};
         content.comm_type = $(".tab-active").attr("data-name");
         if (type === "sel_cluster") content.idArray = selScatter.toString();
+        if (content.comm_type === 'louvain') content.level= $("#louLevel option:selected").val();
         content.func_type = type;
         loadAjax({
             url: '/community',
@@ -442,6 +472,7 @@
         let content = {};
         content.func_type = 'cluster';
         content.comm_type = $(".tab-active").attr("data-name");
+        if (content.comm_type === 'louvain') content.level= $("#louLevel option:selected").val();
         loadAjax({
             url: '/community',
             content: content,

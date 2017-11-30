@@ -52,7 +52,47 @@ body {
 }
 
 .wrapper .file-load {
-    margin: 16px 0
+    margin: 16px 0;
+    display: inline-block;
+}
+.wrapper #louLevel {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: 0;
+    box-shadow: none;
+    border: 0 !important;
+    background-image: none;
+    width: 130px;
+    height: 100%;
+}
+
+.level_select {
+    position: relative;
+    overflow: hidden;
+    border-radius: 3px;
+    width: 180px;
+    height: 32px;
+    line-height: 32px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+    margin: 0 0 0 20px;
+}
+
+.level_select::after {
+    content: '\25BC';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 2px;
+    background: #666;
+    pointer-events: none;
+}
+/* Transition */
+.level_select:hover::after {
+    color: #edf933;
 }
 
 .wrapper .charts {
@@ -67,7 +107,7 @@ body {
     line-height: 30px;
     height: 30px;
 }
-.days-option label {
+span>label, .level_select>span {
     display: inline-block;
     height: 32px;
     padding: 0 6px;
@@ -75,6 +115,11 @@ body {
     background-color: #666;
     color: #fff;
     vertical-align: top;
+}
+
+.level_select>span {
+    width: 50px;
+    box-sizing: border-box;
 }
 
 .wrapper .right-area{

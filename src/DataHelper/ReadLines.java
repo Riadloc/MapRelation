@@ -378,9 +378,14 @@ public class ReadLines {
         return scatter;
     }
 
-    public static TreeMap<String, ArrayList<String>> getCollectionFromFile(String fileName) {
-        String name_clu = "louvain_"+fileName+".clu";
+    public static TreeMap<String, ArrayList<String>> getCollectionFromFile(String fileName, String level) {
+        String name_clu = "";
         String name_net = fileName+".net";
+        if (Integer.parseInt(level) > 0) {
+            name_clu = "louvain_"+fileName+"_level"+level+".clu";
+        } else {
+            name_clu = "louvain_"+fileName+".clu";
+        }
         String col;
         TreeMap<String, ArrayList<String>> scatter = new TreeMap();
         File file_clu = new File(path+name_clu);

@@ -78,7 +78,7 @@ input[type="text"],input[type="number"] {
 
 span {
     color: #fff;
-    margin-left: 3px;
+    /*margin-left: 3px;*/
 }
 
 .clearfix:after{content:".";display:block;height:0;clear:both;visibility:hidden}

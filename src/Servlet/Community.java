@@ -29,7 +29,8 @@ public class Community extends HttpServlet {
         System.out.println(comm_type);
         TreeMap<String, ArrayList<String>> map;
         if (comm_type.equals("louvain")) {
-            map = ReadLines.getCollectionFromFile(fileName);
+            String level = request.getParameter("level");
+            map = ReadLines.getCollectionFromFile(fileName, level);
         } else {
             map = ReadLines.getCollection(fileName, comm_type);
         }
