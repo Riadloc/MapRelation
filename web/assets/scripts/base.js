@@ -22,21 +22,37 @@
         // 海量点大小数组
         size = [BMAP_POINT_SIZE_SMALL,BMAP_POINT_SIZE_NORMAL,BMAP_POINT_SIZE_BIG,BMAP_POINT_SIZE_BIGGER,BMAP_POINT_SIZE_HUGE];
         // 初始化日期选择
-        $(".fromDate").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-22"});
-        $(".toDate").flatpickr({minDate: "2014-03-02", maxDate: "2014-06-23"});
-        $(".the-day").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-23"});
+        $(".from1, .to1, .from2, .to2 .the-day").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-22"});
+        $(".startTimeNY, .endTimeNY").flatpickr({minDate: "2016-11-24", maxDate: "2016-12-25"});
     }
     // 绑定事件
     function bindListener() {
-        $(".day").click(() => generateFilesByTime("day"));                      //有向-生成关系文件[天]
+        $.fn.extend({
+            btnClick: function (callback) {
+                $(this).click(() => {
+                    $(this).css("opacity", ".9");
+                    const text = $(this).text();
+                    $(this).text("Loading");
+                    new Promise((resovle, reject) => {
+                        resovle(callback());
+                    }).then(() => {
+                        $(this).css("opacity", "1");
+                        $(this).text(text);
+                    })
+                })
+            }
+        });
+        $(".day").btnClick(() => generateFilesByTime("day"));                      //有向-生成关系文件[天]
+        $(".day-ny").click(() => generateFilesByTime("ny-day"));                      //有向-生成关系文件[天]
         $(".block").click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
+        $(".block-ny").click(() => generateFilesByTime("ny-block"));                  //有向-生成关系文件[时间段]
         $(".undir-day").click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
         $(".undir-block").click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
         $(".day—scatter").click(() => addScatter());           //聚类散点
         $(".day-core").click(() => addCore());                     //聚类中心联系
         $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
         $(".cluster").click(() => generateFilesByTime("cluster"));      //生成聚类关系文件
-        $(".louvain_cluster").click(() => getCommunity());      //生成聚类关系文件
+        // $(".louvain_cluster").click(() => getCommunity());      生成聚类关系文件
         $(".select-scatter").click(() => selectScatter());              //聚类中心选择
         $(".day—scatter-filter").click(function () {                             //聚类内散点联系
             if (checkHasUpload()) return false;
@@ -304,6 +320,10 @@
                 url = "/byudday";
                 params = {from: $(".from2").val(), to: $(".to2").val()};break;
             }
+            case("ny-day"): {
+                url = "/generate";
+                params = {from: $(".startTimeNY").val(), to: $(".endTimeNY").val(), type: "day"};break;
+            }
             case("hour"): {
                 url = "/byday";
                 params = {day: $(".the-day").val()};break;
@@ -311,6 +331,10 @@
             case("block"): {
                 url = "/byblock";
                 params = {from: $(active).find(".from1").val(), to: $(active).find(".to1").val()};break;
+            }
+            case("ny-block"): {
+                url = "/generate";
+                params = {from: $(".startTimeNY").val(), to: $(".endTimeNY").val(), type: "block"};break;
             }
             case("udblock"): {
                 url = "/byudblock";

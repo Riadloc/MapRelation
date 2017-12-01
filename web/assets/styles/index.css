@@ -165,3 +165,7 @@ span>label, .level_select>span {
         transform: translate(100%);
     }
 }
+
+.tabs-content #net_direct .btn-group>div{
+    margin: 10px 0;
+}

@@ -1,7 +1,9 @@
 package DataHelper;
 
+import com.csvreader.CsvReader;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -14,7 +16,7 @@ import java.util.*;
  */
 public class ReadLines {
     static String path = "E:\\ColdAir\\infomap\\";
-    public static void generate(String from,String to) {
+    public static void generate(String from, String to, String city) throws JSONException, ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null,dt2 = null;
         try {
@@ -29,15 +31,23 @@ public class ReadLines {
         System.out.println("................");
         Calendar time = Calendar.getInstance();
         time.setTime(dt);
-        String name,date;
-        ArrayList<String> stations;
-        JSONArray array;
+        String name = "",date = "";
+        ArrayList<String> stations = new ArrayList<>();
+        JSONArray array = new JSONArray();
         for (int i = 0; i <= len; i++) {
             date = sdf.format(time.getTime());
-            stations = SqlHelper.getStationsArray(date);
-            array = SqlHelper.getRelations(date);
-            date = date.replaceAll("2014|-","");
-            name = "byday_"+date+".net";
+            if (city.equals("hz")) {
+                stations = SqlHelper.getStationsArray(date);
+                array = SqlHelper.getRelations(date);
+                date = date.replaceAll("-","").substring(4);
+                name = "byday_"+date+".net";
+            } else if (city.equals("ny")) {
+                TreeMap<String, Object> collection = getRelationsFromFile(date);
+                stations = (ArrayList<String>) collection.get("stations");
+                array = (JSONArray) collection.get("relations");
+                date = date.replaceAll("-","").substring(4);
+                name = "byday_"+date+"_ny.net";
+            }
             System.out.println("开始生成关系文件\""+name+"\"...");
             File file;
             try {
@@ -71,6 +81,125 @@ public class ReadLines {
         System.out.println("................");
         System.out.println("生成所有关系文件成功");
     }
+
+//    public static void getStationsFromFile(String date) {
+//        String fileName = path + "station.json";
+//        ArrayList<String> stations = new ArrayList<>();
+//        String encoding = "ISO-8859-1";
+//        File file = new File(fileName);
+//        Long filelength = file.length();
+//        String content = "";
+//        byte[] filecontent = new byte[filelength.intValue()];
+//        try {
+//            FileInputStream in = new FileInputStream(file);
+//            in.read(filecontent);
+//            in.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            content =  new String(filecontent, encoding);
+//        } catch (UnsupportedEncodingException e) {
+//            System.err.println("The OS does not support " + encoding);
+//            e.printStackTrace();
+//        }
+//        try {
+//            JSONObject json = new JSONObject(content);
+//            JSONArray array = json.getJSONArray("stationBeanList");
+//            for (int i = 0; i < array.length(); i++) {
+//
+//            }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    public static TreeMap<String, Object> getRelationsFromFile(String date, String... args) throws JSONException, ParseException {
+        int len = args.length;
+        String[] dates = args;
+        System.out.println(dates);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String fileName = path + "NY-"+date.replaceAll("-", "").substring(0, 6)+".csv";
+        System.out.println(fileName);
+        ArrayList<String> stations;
+        TreeMap<String, Object> collection = new TreeMap<>();
+        ArrayList<JSONObject> sortList = new ArrayList<>();
+        TreeSet<String> set = new TreeSet<>();
+        JSONArray relations;
+        try {
+            // 创建CSV读对象
+            CsvReader csvReader = new CsvReader(fileName);
+            // 读表头
+            csvReader.readHeaders();
+            while (csvReader.readRecord()){
+                String startSt = csvReader.get("Start Station ID");
+                String endSt = csvReader.get("End Station ID");
+                String time = csvReader.get("Start Time");
+                boolean isInDate = false;
+                if (len == 0) isInDate = sdf.format(sdf.parse(time)).equals(date);
+                else {
+                    Calendar cl = Calendar.getInstance();
+                    cl.setTime(sdf.parse(time));
+                    long x = cl.getTimeInMillis();
+                    cl.setTime(sdf.parse(date));
+                    long y = cl.getTimeInMillis();
+                    cl.setTime(sdf.parse(dates[0]));
+                    long z = cl.getTimeInMillis();
+                    isInDate = x >= y && x <= z;
+                }
+                if (isInDate) {
+                    set.add(startSt);
+                    set.add(endSt);
+                    int idxInArray = -1;
+                    for (int i = 0; i < sortList.size(); i++) {
+                        if (sortList.get(i).getString("lease").equals(startSt) && sortList.get(i).getString("return").equals(endSt)) {
+                            idxInArray = i;
+                            break;
+                        }
+                    }
+                    if (idxInArray == -1) {
+                        JSONObject rel = new JSONObject();
+                        rel.put("lease", startSt);
+                        rel.put("return", endSt);
+                        rel.put("nums", 1);
+                        sortList.add(rel);
+                    } else {
+                        int num = sortList.get(idxInArray).getInt("nums");
+                        sortList.get(idxInArray).put("nums", num + 1);
+                    }
+                }
+            }
+            stations = new ArrayList<>(set);
+            Collections.sort(sortList, new Comparator<JSONObject>() {
+                @Override
+                public int compare(JSONObject o1, JSONObject o2) {
+                    try {
+                        int l = Integer.parseInt(o1.getString("lease"));
+                        int r = Integer.parseInt(o2.getString("lease"));
+                        if (l > r) {
+                            return 1;
+                        } else if (l < r) {
+                            return -1;
+                        } else {
+                            l = Integer.parseInt(o1.getString("return"));
+                            r = Integer.parseInt(o2.getString("return"));
+                            return Integer.compare(l, r);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    return 0;
+                }
+            });
+            relations = new JSONArray(sortList);
+            collection.put("stations", stations);
+            collection.put("relations", relations);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return collection;
+    }
+
     public static void undirGenerate(String from,String to) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null,dt2 = null;
@@ -131,18 +260,26 @@ public class ReadLines {
             }
         }
     }
-    public static void generateBlock(String from,String to) {
-        String name;
-        String date = from.replaceAll("2014|-","") + "_" + to.replaceAll("2014|-","");
-        ArrayList<String> stations;
-        JSONArray array;
-        long a = System.currentTimeMillis();
-        stations = SqlHelper.getStationsArrayBlock(from,to);
-        array = SqlHelper.getRelationsBlock(from, to);
-        long b = System.currentTimeMillis();
-        System.out.println("查询数据库耗时："+(b-a)+"ms");
+    public static void generateBlock(String from,String to, String city) throws JSONException, ParseException {
+        String name = "";
+        String date = from.replaceAll("-","").substring(4) + "_" + to.replaceAll("-","").substring(4);
+        ArrayList<String> stations = new ArrayList<>();
+        JSONArray array = new JSONArray();
+        long a,b;
+        if (city.equals("hz")) {
+            a = System.currentTimeMillis();
+            stations = SqlHelper.getStationsArrayBlock(from,to);
+            array = SqlHelper.getRelationsBlock(from, to);
+            b = System.currentTimeMillis();
+            System.out.println("查询数据库耗时："+(b-a)+"ms");
+            name = "byday_"+date+".net";
+        } else if (city.equals("ny")) {
+            TreeMap<String, Object> collection = getRelationsFromFile(from, to);
+            stations = (ArrayList<String>) collection.get("stations");
+            array = (JSONArray) collection.get("relations");
+            name = "byday_"+date+"_ny.net";
+        }
         a = System.currentTimeMillis();
-        name = "byday_"+date+".net";
         System.out.println("开始生成关系文件\""+name+"\"...");
         System.out.println("................");
         File file;
