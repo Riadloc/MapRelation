@@ -24,34 +24,40 @@
         // 初始化日期选择
         $(".from1, .to1, .from2, .to2 .the-day").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-22"});
         $(".startTimeNY, .endTimeNY").flatpickr({minDate: "2016-11-24", maxDate: "2016-12-25"});
-    }
-    // 绑定事件
-    function bindListener() {
         $.fn.extend({
-            btnClick: function (callback) {
-                $(this).click(() => {
-                    $(this).css("opacity", ".9");
-                    const text = $(this).text();
-                    $(this).text("Loading");
-                    new Promise((resovle, reject) => {
-                        resovle(callback());
-                    }).then(() => {
-                        $(this).css("opacity", "1");
-                        $(this).text(text);
+            _click: function (callback) {
+                $(this).click(function (e) {
+                    const target = e.target;
+                    const node = $("<img class='icon-loading' src='./assets/images/loading.svg' width='13px' height='13px'/>");
+                    $(target).css("opacity", ".8");
+                    const text = $(target).text();
+                    $(target).text("努力加载中...");
+                    $(target).prepend(node);
+                    callback().then(() => {
+                        $(target).css("opacity", "1");
+                        $(target).text(text);
+                        $(target).remove(node)
+                    }).catch(() => {
+                        $(target).css("opacity", "1");
+                        $(target).text(text);
+                        $(target).remove(node);
                     })
                 })
             }
         });
-        $(".day").btnClick(() => generateFilesByTime("day"));                      //有向-生成关系文件[天]
-        $(".day-ny").click(() => generateFilesByTime("ny-day"));                      //有向-生成关系文件[天]
-        $(".block").click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
-        $(".block-ny").click(() => generateFilesByTime("ny-block"));                  //有向-生成关系文件[时间段]
-        $(".undir-day").click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
-        $(".undir-block").click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
-        $(".day—scatter").click(() => addScatter());           //聚类散点
-        $(".day-core").click(() => addCore());                     //聚类中心联系
-        $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
-        $(".cluster").click(() => generateFilesByTime("cluster"));      //生成聚类关系文件
+    }
+    // 绑定事件
+    function bindListener() {
+        $(".day")._click(() => generateFilesByTime("day"));                      //有向-生成关系文件[天]
+        $(".day-ny")._click(() => generateFilesByTime("ny-day"));                      //有向-生成关系文件[天]
+        $(".block")._click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
+        $(".block-ny")._click(() => generateFilesByTime("ny-block"));                  //有向-生成关系文件[时间段]
+        $(".undir-day")._click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
+        $(".undir-block")._click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
+        $(".cluster")._click(() => generateFilesByTime("cluster"));      //生成聚类关系文件
+        $(".day—scatter")._click(() => addScatter());           //聚类散点
+        $(".day-core")._click(() => addCore());                     //聚类中心联系
+        $(".scatter-relation")._click(() => addScatterRels());           //聚类关联显示
         // $(".louvain_cluster").click(() => getCommunity());      生成聚类关系文件
         $(".select-scatter").click(() => selectScatter());              //聚类中心选择
         $(".day—scatter-filter").click(function () {                             //聚类内散点联系
@@ -360,74 +366,87 @@
                     params.from = time;
                     params.to = time;
                 }
-                $.post(url,params).then((res) => {layer.success(res);}).catch((e) => layer.error(e));
-                break;
+                return new Promise((resolve, reject) => {
+                    $.post(url,params).then((res) => {layer.alert(res);resolve()}).catch((e) => {layer.error(e);reject()});
+                });
             }
         }
 
-        function generateTask(url,params) {
+        return new Promise((resolve, reject) => {
             $.get(url,params).then((res) => {
-                layer.msg('生成文件成功！');
-            }).catch((e) => layer.alert('生成文件失败！'))
-        }
-        if(timeType!='cluster') {
-            generateTask(url,params);
-        }
+                layer.alert('生成文件成功！');
+                resolve();
+            }).catch((e) => {
+                layer.alert('生成文件失败！');
+                reject();
+            })
+        })
     }
 
     // 显示聚类散点
     function addScatter() {
         if (!checkHasUpload()) return false;
-        Scatter('scatter', function () {
-            let color = Common.color();
-            handleScatter(scatters).forEach(function (item,index) {
-                let options = {
-                    color: color[index%38],
-                    size: size[1]
-                };
-                Marker(item, options, "info");
-                // if(!cores[0].length) {
-                //     cores = handleCore(scatters);
-                // }
-            });
-            $(".loading-field").hide();
-        });
+        return new Promise((resolve,reject) => {
+            Scatter('scatter').then(() => {
+                let color = Common.color();
+                handleScatter(scatters).forEach(function (item,index) {
+                    let options = {
+                        color: color[index%38],
+                        size: size[1]
+                    };
+                    Marker(item, options, "info");
+                    // if(!cores[0].length) {
+                    //     cores = handleCore(scatters);
+                    // }
+                    resolve()
+                });
+                $(".loading-field").hide();
+            }).catch(() => reject());
+        })
+
     }
     // 显示聚类中心联系
     function addCore() {
         if (!checkHasUpload()) return false;
-        let options = null;
-        $('.charts').show();myChart.showLoading();
-        Core(function () {
-            clearOverlays();
-            let color = Common.color();
-            let distance = Common.getDistance();
-            showHistogram();
-            {
-                cores.forEach(function (item,index) {
-                    options = {
-                        color: color[index%38],
-                        size: size[Common.getSize(index+1,distance)]
-                    };
-                    Marker([item],options);
-                });
-            }
-            addCurvlines(curvelines, cores);
+        return new Promise((resolve,reject) => {
+            let options = null;
+            $('.charts').show();
+            myChart.showLoading();
+            Core().then(function () {
+                clearOverlays();
+                let color = Common.color();
+                let distance = Common.getDistance();
+                showHistogram();
+                {
+                    cores.forEach(function (item, index) {
+                        options = {
+                            color: color[index % 38],
+                            size: size[Common.getSize(index + 1, distance)]
+                        };
+                        Marker([item], options);
+                    });
+                }
+                addCurvlines(curvelines, cores);
+                resolve();
+            }).catch(() => reject());
         });
     }
 
     //  部分聚类散点联系
     function addScatterRels() {
         if (!checkHasUpload()) return false;
-        let color = Common.color();
-        Scatter("sel_cluster", function () {
-            Common.clearMap();
-            for (let key in relations) {
-                let idx = key.split('-');
-                console.log(idx);
-                addCurvlines(relations[key],null,[color[idx[0]-1], color[idx[1]-1]]);
-            }
-            $(".loading-field").hide();
+        return new Promise((resolve,reject) => {
+            let color = Common.color();
+            Scatter("sel_cluster").then(() => {
+                Common.clearMap();
+                for (let key in relations) {
+                    let idx = key.split('-');
+                    console.log(idx);
+                    addCurvlines(relations[key], null, [color[idx[0] - 1], color[idx[1] - 1]]);
+                }
+                $(".loading-field").hide();
+                resolve();
+            }).catch(() => reject());
         });
     }
 
@@ -450,46 +469,60 @@
                 data.success(res);
             },
             error: function (e) {
-                layer.alert("获取聚类散点失败！");
-                $(".loading-field").hide();
+               data.error();
             }
         })
     }
 
     // 获取散点及散点联系
-    function Scatter(type,fun) {
+    function Scatter(type) {
         let content = {};
         content.comm_type = $(".tab-active").attr("data-name");
         if (type === "sel_cluster") content.idArray = selScatter.toString();
         if (content.comm_type === 'louvain') content.level= $("#louLevel option:selected").val();
         content.func_type = type;
-        loadAjax({
-            url: '/community',
-            content: content,
-            success: function (res) {
-                res = res.split("@");
-                scatters = JSON.parse(res[0])[0];
-                relations = JSON.parse(res[1])[0];
-                fun();
-            }
+        return new Promise((resolve, reject) => {
+            loadAjax({
+                url: '/community',
+                content: content,
+                success: function (res) {
+                    res = res.split("@");
+                    scatters = JSON.parse(res[0])[0];
+                    relations = JSON.parse(res[1])[0];
+                    resolve();
+                },
+                error: function () {
+                    layer.alert("获取聚类散点失败！");
+                    $(".loading-field").hide();
+                    reject();
+                }
+            });
         });
+
     }
 
     // 获取散点及聚类间联系
-    function Core(fun) {
+    function Core() {
         let content = {};
         content.func_type = 'cluster';
         content.comm_type = $(".tab-active").attr("data-name");
         if (content.comm_type === 'louvain') content.level= $("#louLevel option:selected").val();
-        loadAjax({
-            url: '/community',
-            content: content,
-            success: function (res) {
-                res = res.split("@");
-                scatters = JSON.parse(res[0])[0];
-                curvelines = JSON.parse(res[1]);
-                fun();
-            }
+        return new Promise((resolve, reject) => {
+            loadAjax({
+                url: '/community',
+                content: content,
+                success: function (res) {
+                    res = res.split("@");
+                    scatters = JSON.parse(res[0])[0];
+                    curvelines = JSON.parse(res[1]);
+                    resolve();
+                },
+                error: function () {
+                    layer.alert("获取聚类失败！");
+                    $(".loading-field").hide();
+                    reject();
+                }
+            })
         });
     }
     

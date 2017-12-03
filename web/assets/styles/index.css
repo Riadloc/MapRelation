@@ -169,3 +169,18 @@ span>label, .level_select>span {
 .tabs-content #net_direct .btn-group>div{
     margin: 10px 0;
 }
+
+.icon-loading {
+    vertical-align: middle;
+    margin-right: 4px;
+    animation: rotating 2s linear infinite;
+}
+
+@keyframes rotating {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(1turn);
+    }
+}
