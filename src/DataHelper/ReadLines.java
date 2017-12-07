@@ -117,7 +117,6 @@ public class ReadLines {
     public static TreeMap<String, Object> getRelationsFromFile(String date, String... args) throws JSONException, ParseException {
         int len = args.length;
         String[] dates = args;
-        System.out.println(dates);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String fileName = path + "NY-"+date.replaceAll("-", "").substring(0, 6)+".csv";
         System.out.println(fileName);
@@ -503,7 +502,9 @@ public class ReadLines {
         }
         ArrayList<String> vertices = getVertices(fileName);
         TreeMap<String, ArrayList<String>> scatter = new TreeMap();
-        for (int i=1;i<=len;i++) {
+        int begin = 0;
+        if (type.equals("infomap")) begin = 1;
+        for (int i=begin;i<=len;i++) {
             ArrayList<String> array = new ArrayList<>();
             for (int j = 0; j < collection.size(); j++) {
                 if (Integer.parseInt(collection.get(j)) == i) {

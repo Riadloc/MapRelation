@@ -22,12 +22,13 @@
         // 海量点大小数组
         size = [BMAP_POINT_SIZE_SMALL,BMAP_POINT_SIZE_NORMAL,BMAP_POINT_SIZE_BIG,BMAP_POINT_SIZE_BIGGER,BMAP_POINT_SIZE_HUGE];
         // 初始化日期选择
-        $(".from1, .to1, .from2, .to2 .the-day").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-22"});
-        $(".startTimeNY, .endTimeNY").flatpickr({minDate: "2016-11-24", maxDate: "2016-12-25"});
+        $(".from1, .to1, .from2, .to2, .the-day").flatpickr({minDate: "2014-03-01", maxDate: "2014-06-22"});
+        $(".startTimeNY, .endTimeNY").flatpickr({minDate: "2016-11-01", maxDate: "2016-12-31"});
         $.fn.extend({
             _click: function (callback) {
                 $(this).click(function (e) {
                     const target = e.target;
+                    $(target).attr("disabled", "disabled");
                     const node = $("<img class='icon-loading' src='./assets/images/loading.svg' width='13px' height='13px'/>");
                     $(target).css("opacity", ".8");
                     const text = $(target).text();
@@ -36,11 +37,11 @@
                     callback().then(() => {
                         $(target).css("opacity", "1");
                         $(target).text(text);
-                        $(target).remove(node)
+                        $(target).removeAttr("disabled");
                     }).catch(() => {
                         $(target).css("opacity", "1");
                         $(target).text(text);
-                        $(target).remove(node);
+                        $(target).removeAttr("disabled");
                     })
                 })
             }
@@ -81,8 +82,15 @@
                 oldcores = cores;
                 cores = [];
             }
-            $(this).parents('.file-load').find(".file-name").text(e.currentTarget.files[0].name);
+            const fileName = e.currentTarget.files[0].name;
+            $(this).parents('.file-load').find(".file-name").text(fileName);
+            if (fileName.slice(-6,-4) === 'ny') {
+                map.centerAndZoom(new BMap.Point(40.6974034,-74.1197636), 15);
+            } else {
+                map.centerAndZoom(new BMap.Point(120.16711642992,30.25283633644), 15);
+            }
             if ($(this).attr("id") === 'louFile') {
+                $("#louLevel").empty();
                 getLouvainLevelNum();
             }
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
