@@ -85,12 +85,12 @@
             const fileName = e.currentTarget.files[0].name;
             $(this).parents('.file-load').find(".file-name").text(fileName);
             if (fileName.slice(-6,-4) === 'ny') {
-                map.centerAndZoom(new BMap.Point(40.6974034,-74.1197636), 15);
+                map.panTo(new BMap.Point(-74.1197636,40.6974034));
             } else {
-                map.centerAndZoom(new BMap.Point(120.16711642992,30.25283633644), 15);
+                map.panTo(new BMap.Point(120.16711642992,30.25283633644));
             }
             if ($(this).attr("id") === 'louFile') {
-                $("#louLevel").empty();
+                $("#louLevel").find("option").slice(1).remove();
                 getLouvainLevelNum();
             }
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
@@ -154,6 +154,7 @@
                         const node = $("<option value="+i+">"+i+"</option>")
                         $level_select.append(node);
                     }
+                    $level_select.val(level);
                 }
             },
             error: function (e) {
@@ -429,11 +430,12 @@
                     cores.forEach(function (item, index) {
                         options = {
                             color: color[index % 38],
-                            size: size[Common.getSize(index + 1, distance)]
+                            size: size[Common.getSize(index, distance)]
                         };
                         Marker([item], options);
                     });
                 }
+                console.log(curvelines);
                 addCurvlines(curvelines, cores);
                 resolve();
             }).catch(() => reject());

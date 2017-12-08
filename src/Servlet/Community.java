@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.management.relation.Relation;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
@@ -27,13 +29,15 @@ public class Community extends HttpServlet {
         String func_type = request.getParameter("func_type");
         String comm_type = request.getParameter("comm_type");
         System.out.println(comm_type);
-        TreeMap<String, ArrayList<String>> map;
+        HashMap<String, TreeMap<String, ArrayList<String>>> vMap;
         if (comm_type.equals("louvain")) {
             String level = request.getParameter("level");
-            map = ReadLines.getCollectionFromFile(fileName, level);
+            vMap = ReadLines.getCollection(fileName, comm_type, level);
         } else {
-            map = ReadLines.getCollection(fileName, comm_type);
+            vMap = ReadLines.getCollection(fileName, comm_type);
         }
+        TreeMap<String, ArrayList<String>> map = vMap.get("scatter");
+        TreeMap<String, ArrayList<String>> mapSeq = vMap.get("scatter_seq");
         JSON markers = net.sf.json.JSONArray.fromObject(map);
         long a = System.currentTimeMillis();
         if (func_type.equals("scatter")) {
@@ -42,7 +46,12 @@ public class Community extends HttpServlet {
             System.out.println("运行时间： " + (float)(b-a)/1000.0);
             response.getWriter().write(markers.toString()+"@"+relations.toString());
         } else if (func_type.equals("cluster")) {
-            JSONArray relations = SqlHelper.getRelations(map,day);
+            JSONArray relations = new JSONArray();
+            try {
+                relations = ReadLines.getRelations(mapSeq, fileName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             long b = System.currentTimeMillis();
             System.out.println("运行时间： " + (float)(b-a)/1000.0);
             response.getWriter().write(markers.toString()+"@"+relations.toString());

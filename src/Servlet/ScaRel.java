@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
@@ -27,7 +29,8 @@ public class ScaRel extends HttpServlet {
         String[] idArray = request.getParameter("idArray").split(",");
         String fileName = request.getParameter("fileName");
         String comm_type = request.getParameter("comm_type");
-        TreeMap map = ReadLines.getCollection(fileName, comm_type);
+        HashMap<String, TreeMap<String, ArrayList<String>>> vMap = ReadLines.getCollection(fileName, comm_type);
+        TreeMap map = vMap.get("scatter");
         TreeMap newMap = new TreeMap();
         for (int i=0;i<idArray.length;i++) {
             newMap.put(idArray[i],map.get(idArray[i]));

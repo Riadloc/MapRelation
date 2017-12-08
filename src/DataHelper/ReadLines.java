@@ -448,10 +448,12 @@ public class ReadLines {
         }
     }
 
-    public static ArrayList<String> getVertices(String fileName) {
+    public static HashMap<String, ArrayList<String>> getVertices(String fileName) {
         String name_net = fileName+".net";
-        String vertice;
+        String vertice = "";
+        HashMap<String, ArrayList<String>> map = new HashMap<>();
         ArrayList<String> vertices = new ArrayList<>();
+        ArrayList<String> sequences = new ArrayList<>();
         File file_net = new File(path+name_net);
         FileReader fr;
         BufferedReader br;
@@ -465,24 +467,39 @@ public class ReadLines {
                     break;
                 }
                 vertice = stringArray[1].replace("\"","");
+                sequences.add(stringArray[0]);
                 vertices.add(vertice);
             }
             br.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return vertices;
+        map.put("sequences", sequences);
+        map.put("vertices", vertices);
+        return map;
     }
-    public static TreeMap<String, ArrayList<String>> getCollection(String fileName, String type) {
-        String name_clu = type + "_" + fileName+".clu";
+    public static HashMap<String, TreeMap<String, ArrayList<String>>> getCollection(String fileName, String type, String... args) {
+        String name_clu = "";
+        if (type.equals("louvain"))  {
+            String level = args[0];
+            if (Integer.parseInt(level) > 0) {
+                name_clu = "louvain_"+fileName+"_level"+level+".clu";
+            } else {
+                name_clu = "louvain_"+fileName+".clu";
+            }
+        } else {
+            name_clu = type + "_" + fileName+".clu";
+        }
         String name_net = fileName+".net";
         String col;
         int len = 0;
+        HashMap<String, TreeMap<String, ArrayList<String>>> map = new HashMap<>();
+        TreeMap<String, ArrayList<String>> scatter = new TreeMap<>();
+        TreeMap<String, ArrayList<String>> scatter_seq = new TreeMap<>();
         ArrayList<String> collection = new ArrayList<>();
         File file_clu = new File(path+name_clu);
-        File file_net = new File(path+name_net);
-        if (!file_clu.exists() || !file_net.exists()) {
-            System.out.println("file "+name_clu+" does not exist or file "+name_net+" does not exist!");
+        if (!file_clu.exists()) {
+            System.out.println("file "+name_clu+" does not exist!");
             return null;
         }
         FileReader fr;
@@ -500,20 +517,26 @@ public class ReadLines {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ArrayList<String> vertices = getVertices(fileName);
-        TreeMap<String, ArrayList<String>> scatter = new TreeMap();
+        HashMap<String, ArrayList<String>> vMap = getVertices(fileName);
+        ArrayList<String> vertices = vMap.get("vertices");
+        ArrayList<String> sequences = vMap.get("sequences");
         int begin = 0;
         if (type.equals("infomap")) begin = 1;
-        for (int i=begin;i<=len;i++) {
+        for (int i=begin;i<=len;i++) {          // 循环得到len+1个聚类（infomap为len个）
             ArrayList<String> array = new ArrayList<>();
+            ArrayList<String> array_seq = new ArrayList<>();
             for (int j = 0; j < collection.size(); j++) {
                 if (Integer.parseInt(collection.get(j)) == i) {
                     array.add(vertices.get(j));
+                    array_seq.add(sequences.get(j));
                 }
             }
+            scatter_seq.put(String.valueOf(i), array_seq);
             scatter.put(String.valueOf(i),array);
         }
-        return scatter;
+        map.put("scatter", scatter);
+        map.put("scatter_seq", scatter_seq);
+        return map;
     }
 
     public static TreeMap<String, ArrayList<String>> getCollectionFromFile(String fileName, String level) {
@@ -529,10 +552,12 @@ public class ReadLines {
         File file_clu = new File(path+name_clu);
         File file_net = new File(path+name_net);
         if (!file_clu.exists() || !file_net.exists()) {
-            System.out.println("file "+name_clu+" does not exist or file "+name_net+" does not exist!");
+            System.out.println("file "+name_clu+" does not exist!");
             return null;
         }
-        ArrayList<String> vertices = getVertices(fileName);
+        HashMap<String, ArrayList<String>> map = getVertices(fileName);
+        ArrayList<String> vertices = map.get("vertices");
+        ArrayList<String> sequences = map.get("sequences");
         ArrayList<String> collection = new ArrayList<>();
         FileReader fr;
         BufferedReader br;
@@ -561,21 +586,50 @@ public class ReadLines {
         return scatter;
     }
 
-    public static JSONArray getRelations(TreeMap<String,ArrayList<String>> map,String day,String hour) {
-        int len = map.size();
-        ArrayList<String> lease,retn;
-        String lease_id,retn_id;
+    public static JSONArray getRelations(TreeMap<String,ArrayList<String>> map, String fileName) throws JSONException {
+        String name_net = fileName+".net";
+        File file_net = new File(path+name_net);
+        FileReader fr;
+        BufferedReader br;
+        HashMap<String, Integer> heat = new HashMap();
         JSONArray relations = new JSONArray();
-        JSONObject relation;
-        for (int i = 1; i <= len; i++) {
-            for (int j = 1; j <= len; j++) {
-                if (i != j) {
-                    lease_id = String.valueOf(i);
-                    retn_id = String.valueOf(j);
-                    lease = map.get(String.valueOf(i));
-                    retn = map.get(String.valueOf(j));
-                    relation = SqlHelper.getColRels(day,hour,lease_id,retn_id,lease,retn);
-                    relations.put(relation);
+        try {
+            fr = new FileReader(file_net);
+            br = new BufferedReader(fr);
+            Boolean sign = false;
+            String vertice = "";
+            while((vertice = br.readLine())!=null) {
+                String[] stringArray = vertice.split(" ");
+                if (sign) {
+                    heat.put(stringArray[0] + "_" +stringArray[1], Integer.parseInt(stringArray[2]));
+                } else if(stringArray[0].equals("*Arcs")) sign = true;
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (Iterator<String> it1 = map.keySet().iterator(); it1.hasNext();) {
+            String i = it1.next();
+
+            for (Iterator<String> it2 = map.keySet().iterator(); it2.hasNext();) {
+                String j = it2.next();
+                int num = 0;
+                JSONObject jsonObject = new JSONObject();
+                if (!i.equals(j)) {
+                    ArrayList<String> from = map.get(i);
+                    ArrayList<String> to = map.get(j);
+                    for (int k = 0; k < from.size(); k++) {
+                        for (int l = 0; l < to.size(); l++) {
+                            String key = from.get(k)+ "_" +to.get(l);
+                            if (heat.containsKey(key))
+                                num = num + heat.get(key);
+                        }
+                    }
+                    System.out.println(i+"->"+j+":"+num);
+                    jsonObject.put("leaseid", i);
+                    jsonObject.put("returnid", j);
+                    jsonObject.put("nums", String.valueOf(num));
+                    relations.put(jsonObject);
                 }
             }
         }
