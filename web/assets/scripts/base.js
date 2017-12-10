@@ -3,7 +3,7 @@
  * 基本事件
  */
 (function () {
-    var positions = [],myChart,colors=[],size,oldcores= [],trace= [],tmplines=[],scatters= [],relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
+    var positions = {},myChart,colors=[],size,oldcores= [],trace= [],tmplines=[],scatters= [],relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
 
     (function initialize() {
         getPositions();
@@ -38,7 +38,8 @@
                         $(target).css("opacity", "1");
                         $(target).text(text);
                         $(target).removeAttr("disabled");
-                    }).catch(() => {
+                    }).catch((e) => {
+                        console.log(e);
                         $(target).css("opacity", "1");
                         $(target).text(text);
                         $(target).removeAttr("disabled");
@@ -62,7 +63,7 @@
         // $(".louvain_cluster").click(() => getCommunity());      生成聚类关系文件
         $(".select-scatter").click(() => selectScatter());              //聚类中心选择
         $(".day—scatter-filter").click(function () {                             //聚类内散点联系
-            if (checkHasUpload()) return false;
+            if (!checkHasUpload()) return false;
             Common.clearMap();
             $(".loading-field").show();
             let id = trace[0];
@@ -85,7 +86,7 @@
             const fileName = e.currentTarget.files[0].name;
             $(this).parents('.file-load').find(".file-name").text(fileName);
             if (fileName.slice(-6,-4) === 'ny') {
-                map.panTo(new BMap.Point(-74.1197636,40.6974034));
+                map.panTo(new BMap.Point(-73.98669373016,40.73741431289));
             } else {
                 map.panTo(new BMap.Point(120.16711642992,30.25283633644));
             }
@@ -114,17 +115,26 @@
         $.ajax({
             url: '/data',
             type: 'get',
-            timeout: 120000,
-            success: function (res) {
-                // console.log(res);
-                let arr = res.split("@");
-                positions = JSON.parse(arr[0]);
+            timeout: 120000
+        }).then((res) => {
+            let arr = res.split("@");
+            positions["HZ"] = JSON.parse(arr[0]);
+            $.getJSON('/assets/stations_newyork.json').then((data) => {
+                const stationBeanList = data.stationBeanList;
+                const NYStations = stationBeanList.map((item) => {
+                    return {
+                        stationname: item.stationName,
+                        stationid: item.id,
+                        lng: item.longitude,
+                        lat: item.latitude
+                    }
+                });
+                positions["NY"] = NYStations;
                 window.positions = positions;
-            },
-            error: function (e) {
-                layer.alert("获取站点数据失败！\n请刷新网页或检查网络！")
-            }
-        });
+            }).catch(e => {console.error(e)});
+        }).catch((e) => {
+            layer.alert("获取站点数据失败！\n请刷新网页或检查网络！")
+        })
     }
 
     // 检查是否上传文件
@@ -193,9 +203,11 @@
             return $(active).find(".file-name").text().slice(0,-4);
         },
         getInfo(point) {
+            const type = Common.getFileName().slice(-2);
+            const key = type == 'ny' ? 'NY' : 'HZ';
             let info = {};
-            for (let i=0;i<positions.length;i++) {
-                let obj = positions[i];
+            for (let i=0;i<positions[key].length;i++) {
+                let obj = positions[key][i];
                 if ([obj.lng, obj.lat].toString() == [point.lng, point.lat].toString()) {
                     info = [obj.stationid,obj.stationname];
                     break;
@@ -212,9 +224,11 @@
         },
         getLngLat(id) {    //返回坐标点
             let point = {};
-            for (let i=0;i<positions.length;i++) {
-                let obj = positions[i];
-                if (obj.stationid === id) {
+            const type = Common.getFileName().slice(-2);
+            const key = type == 'ny' ? 'NY' : 'HZ';
+            for (let i=0;i<positions[key].length;i++) {
+                let obj = positions[key][i];
+                if (obj.stationid == id) {
                     let xlng = parseFloat(obj.lng);
                     let ylat = parseFloat(obj.lat);
                     point = {lng: xlng, lat: ylat};
@@ -421,24 +435,27 @@
             let options = null;
             $('.charts').show();
             myChart.showLoading();
-            Core().then(function () {
+            const comm_type = $(".tab-active").attr("data-name");
+            Core(comm_type).then(function () {
                 clearOverlays();
                 let color = Common.color();
                 let distance = Common.getDistance();
                 showHistogram();
-                {
-                    cores.forEach(function (item, index) {
-                        options = {
-                            color: color[index % 38],
-                            size: size[Common.getSize(index, distance)]
-                        };
-                        Marker([item], options);
-                    });
-                }
-                console.log(curvelines);
+                let dif = 0;
+                if (comm_type === 'infomap') dif = 1;
+                cores.forEach(function (item, index) {
+                    options = {
+                        color: color[index % 38],
+                        size: size[Common.getSize(index+dif, distance)]
+                    };
+
+                    Marker([item], options);
+                });
+                $(".loading-field").hide();
+                // console.log(curvelines);
                 addCurvlines(curvelines, cores);
                 resolve();
-            }).catch(() => reject());
+            }).catch((e) => reject(e));
         });
     }
 
@@ -512,10 +529,10 @@
     }
 
     // 获取散点及聚类间联系
-    function Core() {
+    function Core(comm_type) {
         let content = {};
         content.func_type = 'cluster';
-        content.comm_type = $(".tab-active").attr("data-name");
+        content.comm_type = comm_type;
         if (content.comm_type === 'louvain') content.level= $("#louLevel option:selected").val();
         return new Promise((resolve, reject) => {
             loadAjax({

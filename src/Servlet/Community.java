@@ -37,11 +37,12 @@ public class Community extends HttpServlet {
             vMap = ReadLines.getCollection(fileName, comm_type);
         }
         TreeMap<String, ArrayList<String>> map = vMap.get("scatter");
+        System.out.println(map);
         TreeMap<String, ArrayList<String>> mapSeq = vMap.get("scatter_seq");
         JSON markers = net.sf.json.JSONArray.fromObject(map);
         long a = System.currentTimeMillis();
         if (func_type.equals("scatter")) {
-            JSONArray relations = SqlHelper.getScatRels(map,day);
+            JSONArray relations = ReadLines.getScatRels(mapSeq,fileName);
             long b = System.currentTimeMillis();
             System.out.println("运行时间： " + (float)(b-a)/1000.0);
             response.getWriter().write(markers.toString()+"@"+relations.toString());

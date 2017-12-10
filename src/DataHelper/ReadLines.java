@@ -15,7 +15,7 @@ import java.util.*;
  * Created by Alien on 2017/4/12.
  */
 public class ReadLines {
-    static String path = "E:\\ColdAir\\infomap\\";
+    static String path = "F:\\codes\\Cluster\\";
     public static void generate(String from, String to, String city) throws JSONException, ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null,dt2 = null;
@@ -625,7 +625,6 @@ public class ReadLines {
                                 num = num + heat.get(key);
                         }
                     }
-                    System.out.println(i+"->"+j+":"+num);
                     jsonObject.put("leaseid", i);
                     jsonObject.put("returnid", j);
                     jsonObject.put("nums", String.valueOf(num));
@@ -634,6 +633,59 @@ public class ReadLines {
             }
         }
         return relations;
+    }
+
+    public static JSONArray getScatRels(TreeMap<String,ArrayList<String>> map, String fileName) {
+        File file_net = new File(path+fileName+".net");
+        FileReader fr;
+        BufferedReader br;
+        HashMap<String, Integer> heat = new HashMap();
+        HashMap<String, String> stations = new HashMap<>();
+        JSONArray scatRels = new JSONArray();
+        try {
+            fr = new FileReader(file_net);
+            br = new BufferedReader(fr);
+            Boolean sign = false;
+            String vertice = "";
+            br.readLine();
+            while((vertice = br.readLine())!=null) {
+                String[] stringArray = vertice.split(" ");
+                if (sign) {
+                    heat.put(stringArray[0] + "_" +stringArray[1], Integer.parseInt(stringArray[2]));
+                }
+                else if(stringArray[0].equals("*Arcs")) sign = true;
+                else {
+                    stations.put(stringArray[0], stringArray[1].replace("\"",""));
+                }
+            }
+            br.close();
+            Iterator it = map.keySet().iterator();
+            JSONObject jsonObject = new JSONObject();
+            while(it.hasNext()) {
+                Object key = it.next();
+                ArrayList<String> scatter = map.get(key);
+                JSONArray array = new JSONArray();
+                for (int i = 0; i < scatter.size(); i++) {
+                    for (int j = 0; j < scatter.size(); j++) {
+                        if (i != j) {
+                            JSONObject obj = new JSONObject();
+                            int num = 0;
+                            String idx = scatter.get(i) + "_" + scatter.get(j);
+                            if (heat.containsKey(idx))  num = heat.get(idx);
+                            obj.put("lease",stations.get(scatter.get(i)));
+                            obj.put("return",stations.get(scatter.get(j)));
+                            obj.put("nums",num);
+                            array.put(obj);
+                        }
+                    }
+                }
+                jsonObject.put(String.valueOf(key), array);
+            }
+            scatRels.put(jsonObject);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return scatRels;
     }
 
     public static void writeClusterToFile(ArrayList<TreeSet> array) {
