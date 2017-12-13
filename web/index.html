@@ -9,9 +9,6 @@
     <link href="./assets/tabs/tab.css" rel="stylesheet">
     <link href="./assets/styles/flatpickr.min.css" rel="stylesheet">
     <script src="http://api.map.baidu.com/api?v=2.0&ak=E9Af9IGwyGDRXMv1lThzQcxCdPchzw9c"></script>
-    <script src="./assets/scripts/jquery-3.1.1.min.js"></script>
-    <script src="./assets/layer/layer.js"></script>
-    <script src="http://cdn.bootcss.com/d3/4.8.0/d3.js"></script>
     <script src="./assets/scripts/CurveLine.min.js"></script>
     <script src="./assets/scripts/echarts.min.js"></script>
 </head>
@@ -19,151 +16,169 @@
 <div id="app">
     <header><h1>自行车站点</h1></header>
     <div class="wrapper">
-        <div id="map"></div>
-        <div class="loading-field">
-            <div class="loading-img"><img src="./assets/images/bike.svg" alt=""></div>
-        </div>
-        <div class="tabs-vertical">
-            <ul class="tabs-nav">
-                <li data-index="0" class="tab-active" data-name="infomap"><a href="#infomap" data-toggle="tab">INFOMAP</a></li>
-                <li data-index="1" data-name="louvain"><a href="#louvain" data-toggle="tab">LOUVAIN</a></li>
-                <li data-index="2" data-name="combo"><a href="#combo" data-toggle="tab">COMBO</a></li>
-                <li data-index="3"><a href="#net_direct" data-toggle="tab">关系文件|有向</a></li>
-                <li data-index="4"><a href="#net_undirect" data-toggle="tab">关系文件|无向</a></li>
-            </ul>
-            <div class="tabs-content">
-                <div class="tab-content-active" id="infomap">
-                    <div class="days-option clearfix">
-                        <span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
-                        <span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
-                    </div>
-                    <div class="file-load">
-                        <label class="ui_button" for="xFile">读取文件<img src="./assets/images/upload.svg" alt=""></label><span class="file-name">选择上传net文件</span>
-                        <form class="form"><input type="file" id="xFile" accept=".net" style="position:absolute;clip:rect(0 0 0 0);"></form>
-                    </div>
-                    <div class="relations-area clearfix">
-                        <span><label>过滤(1-<span class="max-num">max</span>)</label><input type="number" value="10" title="大于等于" class="filter"></span>
-                        <div class="right-area">
-                            <div style="margin-bottom: 16px;text-align: right">
-                                <button class="day—scatter">聚类散点</button>
-                                <button class="day-core">聚类中心联系</button>
-                                <button class="day—scatter-filter">聚类内散点联系</button>
-                            </div>
-                            <div>
-                                <button class="select-scatter">聚类中心选择</button>
-                                <button class="scatter-relation">聚类关联显示</button>
-                                <button class="cluster">生成聚类关系文件</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="louvain" class="tab-pane">
-                    <div class="days-option clearfix">
-                        <span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
-                        <span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
-                    </div>
-                    <div>
-                        <div class="file-load">
-                            <label class="ui_button" for="louFile">读取文件<img src="./assets/images/upload.svg" alt=""></label><span class="file-name">选择上传net文件</span>
-                            <form class="form"><input type="file" id="louFile" accept=".net" style="position:absolute;clip:rect(0 0 0 0);"></form>
-                        </div>
-                        <label for="louLevel" class="level_select">
-                            <span>Level</span><select name="louvain_level" id="louLevel"><option value="0">无</option></select>
-                        </label>
-                    </div>
-                    <div class="relations-area clearfix">
-                        <span><label>过滤(1-<span class="max-num">max</span>)</label><input type="number" value="10" title="大于等于" class="filter"></span>
-                        <div class="right-area">
-                            <div style="margin-bottom: 16px;text-align: right">
-                                <button class="day—scatter">聚类散点</button>
-                                <button class="day-core">聚类中心联系</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="combo">
-                    <div class="days-option clearfix">
-                        <span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
-                        <span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
-                    </div>
-                    <div class="file-load">
-                        <label class="ui_button" for="comFile">读取文件<img src="./assets/images/upload.svg" alt=""></label><span class="file-name">选择上传net文件</span>
-                        <form class="form"><input type="file" id="comFile" accept=".net" style="position:absolute;clip:rect(0 0 0 0);"></form>
-                    </div>
-                    <div class="relations-area clearfix">
-                        <span><label>过滤(1-<span class="max-num">max</span>)</label><input type="number" value="10" title="大于等于" class="filter"></span>
-                        <div class="right-area">
-                            <div style="margin-bottom: 16px;text-align: right">
-                                <button class="day—scatter">聚类散点</button>
-                                <button class="day-core">聚类中心联系</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="net_direct">
-                    <!--<div class="days-option clearfix">-->
-                        <!--<span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>-->
-                        <!--<span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>-->
-                    <!--</div>-->
-                    <div class="btn-group">
-                        <div class="hz-data-btn">
-                            <span>杭州：</span>
+        <div id="community">
+            <div id="comm-content">
+            <div id="map"></div>
+            <div class="loading-field">
+                <div class="loading-img"><img src="./assets/images/bike.svg" alt=""></div>
+            </div>
+            <div class="tabs-vertical">
+                <ul class="tabs-nav">
+                    <li data-index="0" class="tab-active" data-name="infomap"><a href="#infomap" data-toggle="tab">INFOMAP</a></li>
+                    <li data-index="1" data-name="louvain"><a href="#louvain" data-toggle="tab">LOUVAIN</a></li>
+                    <li data-index="2" data-name="combo"><a href="#combo" data-toggle="tab">COMBO</a></li>
+                    <li data-index="3"><a href="#net_direct" data-toggle="tab">关系文件|有向</a></li>
+                    <li data-index="4"><a href="#net_undirect" data-toggle="tab">关系文件|无向</a></li>
+                </ul>
+                <div class="tabs-content">
+                    <div class="tab-content-active" id="infomap">
+                        <div class="days-option clearfix">
                             <span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
                             <span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
-                            <span style="float: right">
-                                <button class="day">生成关系文件[天]</button>
-                                <button class="block">生成关系文件[时间段]</button>
-                            </span>
                         </div>
-                        <div class="ny-data-btn">
-                            <span>纽约：</span>
-                            <span><label>开始</label><input type="text" class="fromDate startTimeNY" value="2016-11-24"/></span>
-                            <span><label>结束</label><input type="text" class="toDate endTimeNY" value="2016-11-27"/></span>
-                            <span style="float: right">
-                                <button class="day-ny">生成关系文件[天]</button>
-                                <button class="block-ny">生成关系文件[时间段]</button>
-                            </span>
+                        <div class="file-load">
+                            <label class="ui_button" for="xFile">读取文件<img src="./assets/images/upload.svg" alt=""></label><span class="file-name">选择上传net文件</span>
+                            <form class="form"><input type="file" id="xFile" accept=".net" style="position:absolute;clip:rect(0 0 0 0);"></form>
+                        </div>
+                        <div class="relations-area clearfix">
+                            <span><label>过滤(1-<span class="max-num">max</span>)</label><input type="number" value="10" title="大于等于" class="filter"></span>
+                            <div class="right-area">
+                                <div>
+                                    <button class="day—scatter">聚类散点</button>
+                                    <button class="day-core">聚类中心联系</button>
+                                    <button class="day—scatter-filter">聚类内散点联系</button>
+                                </div>
+                                <div>
+                                    <button class="select-scatter">聚类中心选择</button>
+                                    <button class="scatter-relation">聚类关联显示</button>
+                                    <button class="cluster">生成聚类关系文件</button>
+                                </div>
+                                <div>
+                                    <button class="cp_btn">生成Circle Packing</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="louvain" class="tab-pane">
+                        <div class="days-option clearfix">
+                            <span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
+                            <span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
+                        </div>
+                        <div>
+                            <div class="file-load">
+                                <label class="ui_button" for="louFile">读取文件<img src="./assets/images/upload.svg" alt=""></label><span class="file-name">选择上传net文件</span>
+                                <form class="form"><input type="file" id="louFile" accept=".net" style="position:absolute;clip:rect(0 0 0 0);"></form>
+                            </div>
+                            <label for="louLevel" class="level_select">
+                                <span>Level</span><select name="louvain_level" id="louLevel"><option value="0">无</option></select>
+                            </label>
+                        </div>
+                        <div class="relations-area clearfix">
+                            <span><label>过滤(1-<span class="max-num">max</span>)</label><input type="number" value="10" title="大于等于" class="filter"></span>
+                            <div class="right-area">
+                                <div style="margin-bottom: 16px;text-align: right">
+                                    <button class="day—scatter">聚类散点</button>
+                                    <button class="day-core">聚类中心联系</button>
+                                    <button class="cp_btn">生成Circle Packing</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="combo">
+                        <div class="days-option clearfix">
+                            <span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
+                            <span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
+                        </div>
+                        <div class="file-load">
+                            <label class="ui_button" for="comFile">读取文件<img src="./assets/images/upload.svg" alt=""></label><span class="file-name">选择上传net文件</span>
+                            <form class="form"><input type="file" id="comFile" accept=".net" style="position:absolute;clip:rect(0 0 0 0);"></form>
+                        </div>
+                        <div class="relations-area clearfix">
+                            <span><label>过滤(1-<span class="max-num">max</span>)</label><input type="number" value="10" title="大于等于" class="filter"></span>
+                            <div class="right-area">
+                                <div style="margin-bottom: 16px;text-align: right">
+                                    <button class="day—scatter">聚类散点</button>
+                                    <button class="day-core">聚类中心联系</button>
+                                    <button class="cp_btn">生成Circle Packing</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="net_direct">
+                        <!--<div class="days-option clearfix">-->
+                            <!--<span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>-->
+                            <!--<span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>-->
+                        <!--</div>-->
+                        <div class="btn-group">
+                            <div class="hz-data-btn">
+                                <span>杭州：</span>
+                                <span><label>开始</label><input type="text" class="fromDate from1" value="2014-04-05"/></span>
+                                <span><label>结束</label><input type="text" class="toDate to1" value="2014-04-07"/></span>
+                                <span style="float: right">
+                                    <button class="day">生成关系文件[天]</button>
+                                    <button class="block">生成关系文件[时间段]</button>
+                                </span>
+                            </div>
+                            <div class="ny-data-btn">
+                                <span>纽约：</span>
+                                <span><label>开始</label><input type="text" class="fromDate startTimeNY" value="2016-11-24"/></span>
+                                <span><label>结束</label><input type="text" class="toDate endTimeNY" value="2016-11-27"/></span>
+                                <span style="float: right">
+                                    <button class="day-ny">生成关系文件[天]</button>
+                                    <button class="block-ny">生成关系文件[时间段]</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="options-area tab-pane" id="net_undirect">
+                        <div class="days-option clearfix">
+                            <span><label>开始</label><input type="text" class="fromDate from2" value="2014-04-05"/></span>
+                            <span><label>结束</label><input type="text" class="toDate to2" value="2014-04-07"/></span>
+                            <div class="right-area">
+                                <button class="undir-day">生成关系文件[天]</button>
+                                <button class="undir-block">生成关系文件[时间段]</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="options-area tab-pane" id="net_undirect">
-                    <div class="days-option clearfix">
-                        <span><label>开始</label><input type="text" class="fromDate from2" value="2014-04-05"/></span>
-                        <span><label>结束</label><input type="text" class="toDate to2" value="2014-04-07"/></span>
-                        <div class="right-area">
-                            <button class="undir-day">生成关系文件[天]</button>
-                            <button class="undir-block">生成关系文件[时间段]</button>
-                        </div>
-                    </div>
+            </div>
+            <div class="charts">
+                <div class="histogram" style="width:700px;height: 230px"></div>
+            </div>
+            <div class="circle-packing"></div>
+            <div class="transition-ruler">
+                <div class="gradient">
+                    <div class="y-b"></div>
+                    <div class="g-y"></div>
+                </div>
+                <div class="gradient-tips">
+                    <div class="gradient-max">255</div>
+                    <div>0</div>
                 </div>
             </div>
-        </div>
-        <div class="charts">
-            <div class="histogram" style="width:700px;height: 230px"></div>
-        </div>
-        <div class="transition-ruler">
-            <div class="gradient">
-                <div class="y-b"></div>
-                <div class="g-y"></div>
-            </div>
-            <div class="gradient-tips">
-                <div class="gradient-max">255</div>
-                <div>0</div>
-            </div>
-        </div>
         <!--<div class="loading">-->
             <!--<div class="loading-a" ></div>-->
             <!--<div class="loading-b" ></div>-->
             <!--<div class="loading-c" ></div>-->
             <!--<div class="loading-d" ></div>-->
         <!--</div>-->
+            </div>
+        </div>
+        <div id="trajectory">
+            <iframe src="assets/trajectory.html" frameborder="0" id="traj-iframe"></iframe>
+        </div>
     </div>
+    <div class="next left"><img src="./assets/images/next.svg" alt="向左"></div>
+    <div class="next right"><img src="./assets/images/next.svg" alt="向右"></div>
 </div>
+<script src="./assets/scripts/jquery-3.1.1.min.js"></script>
+<script src="./assets/layer/layer.js"></script>
+<script src="http://cdn.bootcss.com/d3/4.8.0/d3.js"></script>
 <script src="./assets/scripts/flatpickr.js"></script>
+<script src="./assets/tabs/tab.js"></script>
 <script src="./assets/scripts/dark.js"></script>
 <script src="./assets/scripts/initmap.js"></script>
 <script src="./assets/scripts/colors.js"></script>
 <script src="./assets/scripts/base.js"></script>
-<script src="./assets/tabs/tab.js"></script>
 </body>
 </html>

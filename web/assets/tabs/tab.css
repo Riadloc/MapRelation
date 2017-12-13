@@ -1,18 +1,26 @@
-.tabs-vertical ul{
+.tabs-vertical ul, .tabs-horizon ul {
 	text-align: center;
 	line-height: 50px;
 	list-style: none;
 }
 
-.tabs-vertical a{
+.tabs-vertical a, .tabs-horizon a{
 	color: #333;
 	text-decoration: none;
 	outline: none;
 }
 
 .tabs-vertical {
-	display: flex;
 	box-shadow: 0 0 8px 4px #333;
+}
+
+.tabs-vertical, .tabs-horizon {
+	display: flex;
+	margin: 0 0 20px 0;
+}
+
+.tabs-horizon {
+	flex-direction: column;
 }
 
 .tabs-vertical .tabs-nav {
@@ -20,13 +28,23 @@
 	flex: 0 0 200px;
 }
 
-.tabs-vertical .tabs-content {
+.tabs-content {
 	flex: 1;
 	padding: 20px 16px;
 	min-height: 220px;
 	color: #fff;
 	box-sizing: border-box;
 	background-color: #333;
+}
+
+.tabs-horizon .tabs-nav{
+	flex: 0 0 50px;
+	display: flex;
+	background-color: #D0D4DA;
+	padding: 0;
+}
+.tabs-horizon .tabs-nav>li{
+	flex: 1;
 }
 
 .tabs-nav>li {
@@ -48,5 +66,5 @@
 }
 
 .tabs-content>.tab-content-active {
-	display: block;
+	display: block!important;
 }

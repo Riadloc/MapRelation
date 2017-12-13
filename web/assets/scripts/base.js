@@ -1,9 +1,10 @@
 /**
  * Created by Alien on 2017/3/10.
- * 基本事件
+ * 主脚本
  */
 (function () {
-    var positions = {},myChart,colors=[],size,oldcores= [],trace= [],tmplines=[],scatters= [],relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
+    var positions = {},myChart,colors=[],size,oldcores= [],trace= [],tmplines=[],scatters= {},relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
+    var circlePackData = {name: 'root', children: []}, colorMapping = {};
 
     (function initialize() {
         getPositions();
@@ -39,7 +40,7 @@
                         $(target).text(text);
                         $(target).removeAttr("disabled");
                     }).catch((e) => {
-                        console.log(e);
+                        console.error(e);
                         $(target).css("opacity", "1");
                         $(target).text(text);
                         $(target).removeAttr("disabled");
@@ -69,20 +70,24 @@
             let id = trace[0];
             addCurvlines(relations[id], null);
         });
-        // $('#xFile').change(function(e){
-        //     $("#IFile").text(e.currentTarget.files[0].name);
-        //     console.log(e.currentTarget.files[0]);//e就是你获取的file对象
-        // });
-        // $('#louFile').change(function(e){
-        //     $("#LFile").text(e.currentTarget.files[0].name);
-        //     console.log(e.currentTarget.files[0]);//e就是你获取的file对象
-        // });
+        $(".cp_btn").click(() => showCirclePack());
+        $(".next").click(function () {
+            const height1 = $("#comm-content").height();
+            const height2 = $("#traj-iframe").contents().height();
+            const className = $(this).attr("class").split(" ")[1];
+            setTimeout(() => { $(".next").show(); $(this).hide(); }, 400);
+            let width, height;
+            if (className === 'left') { width = '0'; height = height1; }
+            else { width = '-100%'; height = height2; }
+            $(".wrapper").css("transform", "translateX(" + width + ")").css("height", height);
+        });
         $('.file-load input[type="file"]').change(function (e) {
             clearOverlays();
             if ((!!cores.length) && (!oldcores.length)) {
                 oldcores = cores;
                 cores = [];
             }
+            scatters = {};
             const fileName = e.currentTarget.files[0].name;
             $(this).parents('.file-load').find(".file-name").text(fileName);
             if (fileName.slice(-6,-4) === 'ny') {
@@ -91,7 +96,7 @@
                 map.panTo(new BMap.Point(120.16711642992,30.25283633644));
             }
             if ($(this).attr("id") === 'louFile') {
-                $("#louLevel").find("option").slice(1).remove();
+                $("#louLevel").empty();
                 getLouvainLevelNum();
             }
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
@@ -161,7 +166,7 @@
                 const $level_select = $("#louLevel");
                 if (level) {
                     for (let i=1;i<=level;i++) {
-                        const node = $("<option value="+i+">"+i+"</option>")
+                        const node = $("<option value="+i+">"+i+"</option>");
                         $level_select.append(node);
                     }
                     $level_select.val(level);
@@ -185,6 +190,75 @@
         myChart.showLoading();
     }
 
+    function showCirclePack() {
+        let root = { name: 'circle' };
+        const children = [];
+        if (Object.keys(scatters).length) {
+            // if (circlePackData.children.some((item) =>　item.code === scatters.code[0])) {
+            //     layer.msg("请加载不同聚类散点！");
+            //     return false;
+            // }
+            const svgNode = $("<svg width='550' height='550'></svg>");
+            $(".circle-packing").append(svgNode);
+            root.code = scatters.code[0];
+            let color = [], sign = false;
+            if ($(".circle-packing svg").length === 1) {
+                color = Common.color();
+                sign = true;
+            }
+            for (let key in scatters) {
+                let item = {};
+                item.name = key;
+                item.children = scatters[key].map((it) => {
+                    let currentColor;
+                    if (sign) {
+                        currentColor = color[parseInt(key)];
+                        colorMapping[it] = currentColor;
+                    } else {
+                        if (colorMapping.hasOwnProperty(it))
+                            currentColor = colorMapping[it];
+                        else {
+                            currentColor = color[parseInt(key)];
+                            colorMapping[it] = currentColor;
+                        }
+                    }
+                    const info = Common.getInfoById(it);
+                    return {name: info.name, size: 10, color: currentColor, id: info.id}
+                });
+                children.push(item);
+            }
+            root.children = children;
+            const svg = d3.selectAll(".circle-packing svg").filter(function (d, i, n) {
+                    return i === n.length - 1
+                }),
+                diameter = +svg.attr("width"),
+                g = svg.append("g").attr("transform", "translate(2,2)"),
+                format = d3.format(",d");
+            const pack = d3.pack()
+                .size([diameter - 4, diameter - 4]);
+            root = d3.hierarchy(root)
+                .sum(function(d) { return d.size; })
+                .sort(function(a, b) { return b.value - a.value; });
+            const node = g.selectAll(".node")
+                .data(pack(root).descendants())
+                .enter().append("g")
+                .attr("class", function(d) { return d.children ? "node" : "leaf node"; })
+                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+                .on("click", function (d) {
+                    layer.tips('站点ID：'+ d.data.id +  '<br/>站点名：' + d.data.name, this);
+                });
+            node.append("title")
+                .text(function(d) { return d.data.name + "\n" + format(d.value); });
+            node.append("circle")
+                .attr("r", function(d) { return d.r; })
+                .attr("style", function(d) { return d.children ? "" : `fill: ${d.data.color}`; });
+            $(".circle-packing").show();
+        } else {
+            layer.msg("请先加载聚类散点！");
+            return false;
+        }
+    }
+
     // 公共函数
     var Common = {
         getTime() {
@@ -205,10 +279,10 @@
         getInfo(point) {
             const type = Common.getFileName().slice(-2);
             const key = type == 'ny' ? 'NY' : 'HZ';
-            let info = {};
+            let info = [];
             for (let i=0;i<positions[key].length;i++) {
                 let obj = positions[key][i];
-                if ([obj.lng, obj.lat].toString() == [point.lng, point.lat].toString()) {
+                if ((obj.lng - point.lng) <= 1e-5 && (obj.lat - point.lat) <= 1e-5 ) {
                     info = [obj.stationid,obj.stationname];
                     break;
                 }
@@ -221,6 +295,25 @@
                     return key;
                 }
             }
+        },
+        getInfoById(id) {
+            let info = travel('HZ');
+            if (!info.name) {
+                info = travel('NY');
+            }
+            function travel(key) {
+                for (let i=0;i<positions[key].length;i++) {
+                    let obj = positions[key][i];
+                    if (obj.stationid === id) {
+                        return {
+                            name: obj.stationname,
+                            id: id
+                        };
+                    }
+                }
+                return {name: '', id: ''};
+            }
+            return info;
         },
         getLngLat(id) {    //返回坐标点
             let point = {};
@@ -250,7 +343,6 @@
                 cores.forEach(function (obj,i) {
                     if (Math.min.apply(Math, flag) == 1) {
                         colorize[i] = colors[(++len)%38];
-                        console.log(flag);
                     } else {
                         let distance = oldcores.map(function (item, j) {
                             return flag[j]?1E+10:map.getDistance(obj, item);
@@ -515,6 +607,7 @@
                 success: function (res) {
                     res = res.split("@");
                     scatters = JSON.parse(res[0])[0];
+                    scatters.code = [(new Date()).getTime()];
                     relations = JSON.parse(res[1])[0];
                     resolve();
                 },
@@ -644,7 +737,7 @@
             (function addInfoWindow(points) {
                 points.addEventListener("click", function(obj){
                     let info = Common.getInfo(obj.point);
-                    let id = Common.getID(info[0]);
+                    let id = Common.getID(info[0] + '');
                     let infoWindow = new BMap.InfoWindow("站点ID: "+info[0]+"<br/>" +
                         "站点名： "+info[1]);
                     map.openInfoWindow(infoWindow,obj.point); //开启信息窗口

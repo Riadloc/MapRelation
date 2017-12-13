@@ -1,5 +1,5 @@
 $(document).ready(function() {
-	var widget = $('.tabs-vertical');
+	var widget = $('.tabs-vertical, .tabs-horizon');
 	var tabs = widget.find('ul li'),
 		content = widget.find('.tabs-content > div');
 	tabs.on('click', function (e) {

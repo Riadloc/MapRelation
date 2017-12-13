@@ -12,7 +12,7 @@ import java.io.IOException;
 public class GetLevelNum extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String fileName= request.getParameter("fileName");
-        String path = "F:\\codes\\Cluster";
+        String path = "E:\\ColdAir\\infomap";
         File file = new File(path);
         int count = 0;
         if (file.isDirectory()) {

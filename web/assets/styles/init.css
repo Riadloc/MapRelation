@@ -86,7 +86,7 @@ span {
 .transition-ruler {
     position: absolute;
     top: 600px;
-    right: 20px;
+    right: 5%;
     width: 60px;
     height: 120px;
     font-size: 0;
