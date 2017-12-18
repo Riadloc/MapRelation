@@ -46,7 +46,7 @@ public class ReadLines {
                 stations = (ArrayList<String>) collection.get("stations");
                 array = (JSONArray) collection.get("relations");
                 date = date.replaceAll("-","").substring(4);
-                name = "byday_"+date+"_ny.net";
+                name = "ny_byday_"+date+".net";
             }
             System.out.println("开始生成关系文件\""+name+"\"...");
             File file;
@@ -276,7 +276,7 @@ public class ReadLines {
             TreeMap<String, Object> collection = getRelationsFromFile(from, to);
             stations = (ArrayList<String>) collection.get("stations");
             array = (JSONArray) collection.get("relations");
-            name = "byday_"+date+"_ny.net";
+            name = "ny_byday_"+date+".net";
         }
         a = System.currentTimeMillis();
         System.out.println("开始生成关系文件\""+name+"\"...");
@@ -480,17 +480,22 @@ public class ReadLines {
     }
     public static HashMap<String, TreeMap<String, ArrayList<String>>> getCollection(String fileName, String type, String... args) {
         String name_clu = "";
+        String city =  "";
+        String newFileName = fileName;
+        if (fileName.substring(0,2).equals("ny")) {
+            city = "ny_";
+            newFileName = fileName.substring(3);
+        }
         if (type.equals("louvain"))  {
             String level = args[0];
             if (Integer.parseInt(level) > 0) {
-                name_clu = "louvain_"+fileName+"_level"+level+".clu";
+                name_clu = city + "louvain_"+newFileName+"_level"+level+".clu";
             } else {
-                name_clu = "louvain_"+fileName+".clu";
+                name_clu = city + "louvain_"+newFileName+".clu";
             }
         } else {
-            name_clu = type + "_" + fileName+".clu";
+            name_clu = city + type + "_" + newFileName+".clu";
         }
-        String name_net = fileName+".net";
         String col;
         int len = 0;
         HashMap<String, TreeMap<String, ArrayList<String>>> map = new HashMap<>();
@@ -520,9 +525,7 @@ public class ReadLines {
         HashMap<String, ArrayList<String>> vMap = getVertices(fileName);
         ArrayList<String> vertices = vMap.get("vertices");
         ArrayList<String> sequences = vMap.get("sequences");
-        int begin = 0;
-        if (type.equals("infomap")) begin = 1;
-        for (int i=begin;i<=len;i++) {          // 循环得到len+1个聚类（infomap为len个）
+        for (int i=0;i<=len;i++) {          // 循环得到len+1个聚类（infomap为len个）
             ArrayList<String> array = new ArrayList<>();
             ArrayList<String> array_seq = new ArrayList<>();
             for (int j = 0; j < collection.size(); j++) {

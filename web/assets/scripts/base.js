@@ -90,7 +90,7 @@
             scatters = {};
             const fileName = e.currentTarget.files[0].name;
             $(this).parents('.file-load').find(".file-name").text(fileName);
-            if (fileName.slice(-6,-4) === 'ny') {
+            if (fileName.slice(0,2) === 'ny') {
                 map.panTo(new BMap.Point(-73.98669373016,40.73741431289));
             } else {
                 map.panTo(new BMap.Point(120.16711642992,30.25283633644));
@@ -277,12 +277,12 @@
             return $(active).find(".file-name").text().slice(0,-4);
         },
         getInfo(point) {
-            const type = Common.getFileName().slice(-2);
+            const type = Common.getFileName().slice(0,2);
             const key = type == 'ny' ? 'NY' : 'HZ';
             let info = [];
             for (let i=0;i<positions[key].length;i++) {
                 let obj = positions[key][i];
-                if ((obj.lng - point.lng) <= 1e-5 && (obj.lat - point.lat) <= 1e-5 ) {
+                if (Math.abs(obj.lng - point.lng) <= 1e-5 && Math.abs(obj.lat - point.lat) <= 1e-5 ) {
                     info = [obj.stationid,obj.stationname];
                     break;
                 }
@@ -317,7 +317,7 @@
         },
         getLngLat(id) {    //返回坐标点
             let point = {};
-            const type = Common.getFileName().slice(-2);
+            const type = Common.getFileName().slice(0,2);
             const key = type == 'ny' ? 'NY' : 'HZ';
             for (let i=0;i<positions[key].length;i++) {
                 let obj = positions[key][i];
@@ -533,12 +533,10 @@
                 let color = Common.color();
                 let distance = Common.getDistance();
                 showHistogram();
-                let dif = 0;
-                if (comm_type === 'infomap') dif = 1;
                 cores.forEach(function (item, index) {
                     options = {
                         color: color[index % 38],
-                        size: size[Common.getSize(index+dif, distance)]
+                        size: size[Common.getSize(index, distance)]
                     };
 
                     Marker([item], options);
@@ -634,6 +632,7 @@
                 success: function (res) {
                     res = res.split("@");
                     scatters = JSON.parse(res[0])[0];
+                    scatters.code = [(new Date()).getTime()];
                     curvelines = JSON.parse(res[1]);
                     resolve();
                 },
@@ -669,6 +668,7 @@
         let cores = [];
         scatIds.length = 0;
         for (let key in points) {
+            if (key === 'code') continue;
             let xsum=0,ysum=0,xav,yav,len=0;
             points[key].forEach(function (point) {
                 let marker = Common.getLngLat(point);
@@ -741,6 +741,7 @@
                     let infoWindow = new BMap.InfoWindow("站点ID: "+info[0]+"<br/>" +
                         "站点名： "+info[1]);
                     map.openInfoWindow(infoWindow,obj.point); //开启信息窗口
+                    console.log(obj.point);
                     if (trace.indexOf(id) == -1) {
                         $('.charts').show();myChart.showLoading();
                         trace.shift();trace.push(id);

@@ -18,7 +18,7 @@ public class GetLevelNum extends HttpServlet {
         if (file.isDirectory()) {
             String[] fileList = file.list();
             for (int i = 0; i < fileList.length; i++) {
-                if (fileList[i].contains(fileName+"_"+"level")) count++;
+                if (fileList[i].contains(fileName.substring(3)+"_"+"level")) count++;
             }
         }
         response.getWriter().write(String.valueOf(count));
