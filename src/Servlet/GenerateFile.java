@@ -21,9 +21,10 @@ public class GenerateFile extends HttpServlet {
         String from = request.getParameter("from");
         String to = request.getParameter("to");
         String type = request.getParameter("type");
+        String city = request.getParameter("city");
         try {
-            if (type.equals("day")) ReadLines.generate(from,to, "ny");
-            if (type.equals("block")) ReadLines.generateBlock(from,to, "ny");
+            if (type.equals("day")) ReadLines.generate(from,to, city);
+            if (type.equals("block")) ReadLines.generateBlock(from,to, city);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (ParseException e) {

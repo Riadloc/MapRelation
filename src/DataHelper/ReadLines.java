@@ -42,15 +42,22 @@ public class ReadLines {
                 date = date.replaceAll("-","").substring(4);
                 name = "byday_"+date+".net";
             } else if (city.equals("ny")) {
-                TreeMap<String, Object> collection = getRelationsFromFile(date);
+                TreeMap<String, Object> collection = getRelationsFromFile("NY", date);
                 stations = (ArrayList<String>) collection.get("stations");
                 array = (JSONArray) collection.get("relations");
                 date = date.replaceAll("-","").substring(4);
                 name = "ny_byday_"+date+".net";
+            } else if (city.equals("ch")) {
+                TreeMap<String, Object> collection = getRelationsFromFile("CH", date);
+                stations = (ArrayList<String>) collection.get("stations");
+                array = (JSONArray) collection.get("relations");
+                date = date.replaceAll("-","").substring(4);
+                name = "ch_byday_"+date+".net";
             }
             System.out.println("开始生成关系文件\""+name+"\"...");
             File file;
             try {
+                System.out.println(path+name);
                 file = new File(path+name);
                 if(!file.exists()) {
                     file.createNewFile();
@@ -114,11 +121,13 @@ public class ReadLines {
 //        }
 //    }
 
-    public static TreeMap<String, Object> getRelationsFromFile(String date, String... args) throws JSONException, ParseException {
+    public static TreeMap<String, Object> getRelationsFromFile(String city, String date, String... args) throws JSONException, ParseException {
         int len = args.length;
         String[] dates = args;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String fileName = path + "NY-"+date.replaceAll("-", "").substring(0, 6)+".csv";
+        int diff = 6;
+        if (city.equals("CH")) diff = 4;
+        String fileName = path + city + "-"+date.replaceAll("-", "").substring(0, diff)+".csv";
         System.out.println(fileName);
         ArrayList<String> stations;
         TreeMap<String, Object> collection = new TreeMap<>();
@@ -273,10 +282,15 @@ public class ReadLines {
             System.out.println("查询数据库耗时："+(b-a)+"ms");
             name = "byday_"+date+".net";
         } else if (city.equals("ny")) {
-            TreeMap<String, Object> collection = getRelationsFromFile(from, to);
+            TreeMap<String, Object> collection = getRelationsFromFile("NY", from, to);
             stations = (ArrayList<String>) collection.get("stations");
             array = (JSONArray) collection.get("relations");
             name = "ny_byday_"+date+".net";
+        } else if (city.equals("ch")) {
+            TreeMap<String, Object> collection = getRelationsFromFile("CH", from, to);
+            stations = (ArrayList<String>) collection.get("stations");
+            array = (JSONArray) collection.get("relations");
+            name = "ch_byday_"+date+".net";
         }
         a = System.currentTimeMillis();
         System.out.println("开始生成关系文件\""+name+"\"...");

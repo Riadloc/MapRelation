@@ -53,14 +53,16 @@
     function bindListener() {
         $(".day")._click(() => generateFilesByTime("day"));                      //有向-生成关系文件[天]
         $(".day-ny")._click(() => generateFilesByTime("ny-day"));                      //有向-生成关系文件[天]
+        $(".day-ch")._click(() => generateFilesByTime("ch-day"));                      //有向-生成关系文件[天]
         $(".block")._click(() => generateFilesByTime("block"));                  //有向-生成关系文件[时间段]
         $(".block-ny")._click(() => generateFilesByTime("ny-block"));                  //有向-生成关系文件[时间段]
+        $(".block-ch")._click(() => generateFilesByTime("ch-block"));                  //有向-生成关系文件[时间段]
         $(".undir-day")._click(() => generateFilesByTime("udday"));              //无向-生成关系文件[天]
         $(".undir-block")._click(() => generateFilesByTime("udblock"));          //无向-生成关系文件[时间段]
         $(".cluster")._click(() => generateFilesByTime("cluster"));      //生成聚类关系文件
         $(".day—scatter")._click(() => addScatter());           //聚类散点
         $(".day-core")._click(() => addCore());                     //聚类中心联系
-        $(".scatter-relation")._click(() => addScatterRels());           //聚类关联显示
+        $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
         // $(".louvain_cluster").click(() => getCommunity());      生成聚类关系文件
         $(".select-scatter").click(() => selectScatter());              //聚类中心选择
         $(".day—scatter-filter").click(function () {                             //聚类内散点联系
@@ -364,10 +366,10 @@
         },
         getDistance() {
             let distance=[];
-            for(key in scatters) {
+            for(let key in scatters) {
                 distance.push(scatters[key].length);
             }
-            return Math.max(...distance);
+            return Math.max.apply(Math, distance);
         },
         getColor(weight) {
             let compute1 = d3.interpolate(green,yellow);
@@ -443,7 +445,11 @@
             }
             case("ny-day"): {
                 url = "/generate";
-                params = {from: $(".startTimeNY").val(), to: $(".endTimeNY").val(), type: "day"};break;
+                params = {from: $(".ny-data-btn .startTimeNY").val(), to: $(".ny-data-btn .endTimeNY").val(), type: "day", city: 'ny'};break;
+            }
+            case("ch-day"): {
+                url = "/generate";
+                params = {from: $(".ny-data-btn .startTimeNY").val(), to: $(".ny-data-btn .endTimeNY").val(), type: "day", city: 'ch'};break;
             }
             case("hour"): {
                 url = "/byday";
@@ -455,7 +461,11 @@
             }
             case("ny-block"): {
                 url = "/generate";
-                params = {from: $(".startTimeNY").val(), to: $(".endTimeNY").val(), type: "block"};break;
+                params = {from: $(".ny-data-btn .startTimeNY").val(), to: $(".ny-data-btn .endTimeNY").val(), type: "block", city: 'ny'};break;
+            }
+            case("ch-block"): {
+                url = "/generate";
+                params = {from: $(".ny-data-btn .startTimeNY").val(), to: $(".ny-data-btn .endTimeNY").val(), type: "block", city: 'ch'};break;
             }
             case("udblock"): {
                 url = "/byudblock";
@@ -586,7 +596,7 @@
                 data.success(res);
             },
             error: function (e) {
-               data.error();
+               data.error(e);
             }
         })
     }
@@ -609,10 +619,10 @@
                     relations = JSON.parse(res[1])[0];
                     resolve();
                 },
-                error: function () {
+                error: function (e) {
                     layer.alert("获取聚类散点失败！");
                     $(".loading-field").hide();
-                    reject();
+                    reject(e);
                 }
             });
         });
@@ -636,10 +646,10 @@
                     curvelines = JSON.parse(res[1]);
                     resolve();
                 },
-                error: function () {
+                error: function (e) {
                     layer.alert("获取聚类失败！");
                     $(".loading-field").hide();
-                    reject();
+                    reject(e);
                 }
             })
         });
@@ -691,16 +701,19 @@
         Common.clearMap();
         selScatter.length = 0;
         if (!checkHasUpload()) return false;
-        Scatter("scatter", function () {
+        Scatter("scatter").then(() => {
             let color = Common.color();
             let distance = Common.getDistance();
             cores.forEach(function (item,index) {
                 Marker([item],{
                     color: color[index%38],
-                    size: size[Common.getSize(index+1,distance)]
+                    size: size[Common.getSize(index,distance)]
                 }, "select");
             });
             $(".loading-field").hide();
+        }).catch((e) => {
+            layer.msg("出错！");
+            console.error(e);
         });
     }
 
@@ -760,7 +773,7 @@
         // 响应点击散点函数
         function showSelectEvent(points) {
             points.addEventListener("click", function (obj) {
-                let index = cores.indexOf(obj.point) + 1 + "";
+                let index = cores.indexOf(obj.point) + "";
                 if (~selScatter.indexOf(index)) {
                     selScatter.splice(selScatter.indexOf(index),1);
                     let i = cores.indexOf(obj.point);
@@ -775,7 +788,7 @@
                         shape: BMAP_POINT_SHAPE_CIRCLE,
                         color: grey700
                     });
-                    selScatter.push(cores.indexOf(obj.point) + 1 + "");
+                    selScatter.push(cores.indexOf(obj.point) + "");
                 }
             });
         }
@@ -940,6 +953,8 @@
                 }).length;
                 series.push(s);
             }
+            console.log("x:" +xAxis);
+            console.log("y:" +series);
             return [xAxis,series]
         }
         myChart.hideLoading();
