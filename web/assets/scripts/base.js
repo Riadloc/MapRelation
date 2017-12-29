@@ -15,7 +15,7 @@
 
     function initialDefinite() {
         // 构造图表
-        $('.charts').show();myChart = echarts.init($('.histogram')[0], 'dark');$('.charts').hide();
+        $('.charts').show();myChart = echarts.init($('.histogram')[0]);$('.charts').hide();
         // 颜色数组
         colors= [red, purple, blue, limeA700, yellow600, orange600, indigoA400, cyanA200, pink, pink200, greenA200, blue200, brown600,
             yellow300, lime900, deepOrange400, green900, purple900, red900, orange200, redA100, pink900, cyan200, cyan900, lime400, lightBlue900, deepPurpleA200, green400, brown200, deepPurple200,
@@ -394,14 +394,30 @@
                     left: '3%', right: '15%', bottom: '3%', containLabel: true
                 }, xAxis : [
                     {
-                        name: 'rentNum',
+                        name: 'flowNum',
                         type : 'category',
                         data : [],
-                        axisTick: {alignWithLabel: true}
+                        axisTick: {alignWithLabel: true},
+                        axisLabel: {
+                            color: '#000',
+                            fontWeight: 'bold'
+                        },
+                        nameTextStyle: {
+                            color: '#000',
+                            fontWeight: 'bold'
+                        }
                     }
                 ], yAxis : [{
                     name: 'freqNum',
-                    type : 'value'
+                    type : 'value',
+                    axisLabel: {
+                        color: '#000',
+                        fontWeight: 'bold'
+                    },
+                    nameTextStyle: {
+                        color: '#000',
+                        fontWeight: 'bold'
+                    }
                 }
                 ], series : [{
                     name:'热度',
@@ -953,8 +969,6 @@
                 }).length;
                 series.push(s);
             }
-            console.log("x:" +xAxis);
-            console.log("y:" +series);
             return [xAxis,series]
         }
         myChart.hideLoading();

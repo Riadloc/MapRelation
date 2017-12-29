@@ -132,10 +132,15 @@ body {
 
 .wrapper .charts {
     margin: 16px 0;
+    padding: 20px 0;
     background-color: #333;
     display: none;
     text-align: -webkit-center;
     text-align: -moz-center;
+}
+
+.wrapper .charts .histogram {
+    background-color: #fff!important;
 }
 
 .wrapper .days-option {
