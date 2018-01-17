@@ -15,7 +15,7 @@ import java.util.*;
  * Created by Alien on 2017/4/12.
  */
 public class ReadLines {
-    static String path = "E:\\ColdAir\\infomap\\";
+    static String path = "E:\\ColdAir\\relations\\";
     public static void generate(String from, String to, String city) throws JSONException, ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null,dt2 = null;

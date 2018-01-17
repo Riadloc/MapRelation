@@ -78,7 +78,11 @@ body {
     transform: rotate(0.5turn);
 }
 
-.wrapper #map{
+.wrapper #map {
+    display: none;
+}
+
+.wrapper #map, .wrapper #bmap{
     width: 100%;
     height: 800px;
     margin: 0 0 20px 0;
@@ -169,6 +173,10 @@ span>label, .level_select>span {
 
 .wrapper .right-area > div {
     margin-bottom: 16px;
+}
+
+.scatter-rel {
+    display: none;
 }
 
 .circle-packing {

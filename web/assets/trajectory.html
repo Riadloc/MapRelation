@@ -108,7 +108,7 @@
                               width="20" height="120"/>
                     </svg>
                 </div>
-                <div style="width: 50px;height: 120px;background: rgba(0,0,0,0);float: right">
+                <div style="width: 50px;height: 120px;background: rgba(0,0,0,0);float: right;color:#000">
                     <p id="max" style="margin-top: 0">300</p>
                     <p style="margin-top: 80px">0</p>
                 </div>
@@ -533,6 +533,7 @@
         var maxcount=$("#maxcount").val();
         var mincount=$("#mincount").val();
         map.clearOverlays();
+        addSubWay2();
         document.getElementById('max').innerHTML=maxcount;
         //alert(stadistance2);
        //makelien(120.09918,30.30402,120.10001,30.309789,10,10,"你好","你不好");

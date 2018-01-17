@@ -3,8 +3,7 @@
  * 主脚本
  */
 (function () {
-    var positions = {},myChart,colors=[],size,oldcores= [],trace= [],tmplines=[],scatters= {},relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
-    var circlePackData = {name: 'root', children: []}, colorMapping = {};
+    var positions = {},myChart,bmap,colors=[],size,oldcores= [],trace= [],tmplines=[],scatters= {},relations= [],scatIds= [],curvelines= [],cores= [],selScatter= [];
 
     (function initialize() {
         getPositions();
@@ -17,6 +16,7 @@
         // 构造图表
         $('.charts').show();myChart = echarts.init($('.histogram')[0]);$('.charts').hide();
         // 颜色数组
+        bmap = initialBMap();
         colors= [red, purple, blue, limeA700, yellow600, orange600, indigoA400, cyanA200, pink, pink200, greenA200, blue200, brown600,
             yellow300, lime900, deepOrange400, green900, purple900, red900, orange200, redA100, pink900, cyan200, cyan900, lime400, lightBlue900, deepPurpleA200, green400, brown200, deepPurple200,
             indigo900, indigo100,indigo300,blueGrey700 ,grey700,grey400,black,deepOrange200];
@@ -63,14 +63,22 @@
         $(".day—scatter")._click(() => addScatter());           //聚类散点
         $(".day-core")._click(() => addCore());                     //聚类中心联系
         $(".scatter-relation").click(() => addScatterRels());           //聚类关联显示
+        $(".scatter-rel").click(() => {
+            const len = Object.keys(scatters).length - 1;
+            for (let i=0; i<len; i++) {
+                selScatter.push(i);
+            }
+            addScatterRels();
+        });           //散点关联
         // $(".louvain_cluster").click(() => getCommunity());      生成聚类关系文件
         $(".select-scatter").click(() => selectScatter());              //聚类中心选择
         $(".day—scatter-filter").click(function () {                             //聚类内散点联系
             if (!checkHasUpload()) return false;
-            Common.clearMap();
+            // Common.clearMap();
             $(".loading-field").show();
             let id = trace[0];
-            addCurvlines(relations[id], null);
+            // addCurvlines(relations[id], null);
+            addLines(relations[id]);
         });
         $(".cp_btn").click(() => showCirclePack());
         $(".next").click(function () {
@@ -91,6 +99,8 @@
             }
             scatters = {};
             const fileName = e.currentTarget.files[0].name;
+            if (fileName.includes('cluster')) $('.scatter-rel').show();
+            else $('.scatter-rel').hide();
             $(this).parents('.file-load').find(".file-name").text(fileName);
             if (fileName.slice(0,2) === 'ny') {
                 map.panTo(new BMap.Point(-73.98669373016,40.73741431289));
@@ -104,8 +114,108 @@
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
         })
     }
+    function initialBMap() {
+        const bmap = echarts.init($("#bmap")[0]);
+        const option = {
+            title: {
+                text: '公共自行车流量图',
+                subtext: 'data from Hangzhou PBS',
+                left: 'center'
+            },
+            tooltip : {
+                trigger: 'item'
+            },
+            bmap: {
+                center: [120.16711642992, 30.25283633644],
+                zoom: 15,
+                mapStyle: {
+                    styleJson: [{
+                            "featureType": "all",
+                            "elementType": "all",
+                            "stylers": {
+                                "lightness": 10,
+                                "saturation": -100
+                            }
+                    }]
+                }
+            },
+            series : [
+                {
+                    name: 'scatter',
+                    type: 'scatter',
+                    coordinateSystem: 'bmap',
+                    data: [],
+                    symbolSize: 10,
+                    label: {
+                        normal: {
+                            formatter: '{b}',
+                            position: 'right',
+                            show: false
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: function ({data}) {
+                                return colors[data[2]-0]
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+        bmap.setOption(option);
+        bmap.on('click', function (params) {
+            console.log(params);
+            const id = params.data[2];
+            if(params.componentSubType === 'scatter') {
+                if (trace.indexOf(id) == -1) {
+                    $('.charts').show();myChart.showLoading();
+                    trace.shift();trace.push(id);
+                    showHistogram2(id);
+                    if (tmplines.length >0 ) {
+                        tmplines.forEach(function (item) {
+                            map.removeOverlay(item);
+                        });
+                        tmplines.length = 0;
+                    }
+                }
+            }
+
+        });
+        const bmapInstance = bmap.getModel().getComponent('bmap').getBMap();
+        bmapInstance.enableDragging();
+        addMapControl(bmapInstance);
+        addSubWay(bmapInstance);
+        function addMapControl(instance) {
+            //缩放控件
+            const naviControl = new BMap.NavigationControl({
+                anchor : BMAP_ANCHOR_TOP_LEFT
+            });
+            instance.addControl(naviControl);
+
+            //缩略图控件
+            const overControl = new BMap.OverviewMapControl({
+                anchor : BMAP_ANCHOR_BOTTOM_RIGHT,
+                isOpen : false,
+                offset : new BMap.Size(50, 50)
+            });
+            instance.addControl(overControl);
+
+            //比例尺控件
+            const scaleControl = new BMap.ScaleControl({
+                anchor : BMAP_ANCHOR_BOTTOM_LEFT,
+                offset : new BMap.Size(50, 20)
+            });
+            instance.addControl(scaleControl);
+        }
+        return bmap;
+    }
+    
     // 绘制地铁一号线
-    function addSubWay() {
+    function addSubWay(instance) {
         let points = [
             [[120.354264,30.316329],[120.341868,30.315456]],[[120.341221,30.315425],[120.332328,30.315347]],[[120.331735,30.315362],[120.319284,30.31569]],[[120.318745,30.315721],[120.285185,30.31689]],[[120.284897,30.31689],[120.282094,30.31664],[120.274549,30.313835],[120.273183,30.313772]],[[120.273183,30.313772],[120.268117,30.313866],[120.261541,30.31293],[120.259026,30.312026]],[[120.258595,30.311777],[120.247815,30.30657]],[[120.247384,30.306344],[120.234161,30.301332],[120.23028,30.300396]],[[120.229633,30.300241],[120.221225,30.298183],[120.214398,30.294441],[120.199342,30.290324]],[[120.198678,30.290106],[120.197708,30.289794],[120.194761,30.28967],[120.187323,30.29101],[120.18373,30.290886]],[[120.183155,30.290886],[120.178879,30.290168],[120.175897,30.289171],[120.173238,30.287705],[120.172268,30.287011],[120.172268,30.286075]],[[120.172268,30.285576],[120.172375,30.281335],[120.170112,30.276563],[120.17004,30.275752],[120.170255,30.26861]],[[120.170291,30.268111],[120.170507,30.26078]],[[120.170579,30.26025],[120.170902,30.254978],[120.172232,30.25267],[120.173489,30.251765],[120.174064,30.251703]],[[120.174567,30.251671],[120.183766,30.251297],[120.186497,30.250767],[120.187323,30.250268]],[[120.18779,30.249987],[120.197205,30.242905]],[[120.1976,30.242499],[120.203672,30.237164]],[[120.204139,30.236727],[120.213087,30.227444],[120.222824,30.216163],[120.222896,30.215726]],[[120.223004,30.215188],[120.223974,30.206074]],[[120.224046,30.205513],[120.225447,30.195243],[120.226489,30.193745],[120.226956,30.193464]],[[120.227388,30.193183],[120.228034,30.192746],[120.235652,30.191029],[120.237017,30.19003]],[[120.237449,30.189718],[120.241006,30.186222],[120.24,30.182101],[120.240718,30.174226]]
         ];
@@ -114,7 +224,8 @@
             let polyline = new BMap.Polyline(pointsArr, {
                 strokeColor: '#DC0000', strokeWeight: 2, strokeOpacity: 1
             });
-            map.addOverlay(polyline);
+            if(instance) instance.addOverlay(polyline);
+            else map.addOverlay(polyline);
         });
     }
     // 后端获取站点数据
@@ -196,10 +307,6 @@
         let root = { name: 'circle' };
         const children = [];
         if (Object.keys(scatters).length) {
-            // if (circlePackData.children.some((item) =>　item.code === scatters.code[0])) {
-            //     layer.msg("请加载不同聚类散点！");
-            //     return false;
-            // }
             const svgNode = $("<svg width='550' height='550'></svg>");
             $(".circle-packing").append(svgNode);
             root.code = scatters.code[0];
@@ -530,6 +637,7 @@
         return new Promise((resolve,reject) => {
             Scatter('scatter').then(() => {
                 let color = Common.color();
+                convertData(scatters);
                 handleScatter(scatters).forEach(function (item,index) {
                     let options = {
                         color: color[index%38],
@@ -542,9 +650,27 @@
                     resolve()
                 });
                 $(".loading-field").hide();
-            }).catch(() => reject());
+            }).catch((e) => reject(e));
         })
-
+    }
+    function convertData(scatter) {
+        let data = [];
+        for (let key in scatter) {
+            scatter[key].forEach(function (point) {
+                let marker = Common.getLngLat(point);
+                if (marker.lng == 0 || marker.lng == null || marker.lng == undefined) {
+                    console.log("marker:"+marker+"  point:"+point);
+                } else {
+                    data.push([marker.lng, marker.lat, key]);
+                }
+            });
+        }
+        bmap.setOption({
+            series: [{
+                name: 'scatter',
+                data: data
+            }]
+        })
     }
     // 显示聚类中心联系
     function addCore() {
@@ -763,27 +889,24 @@
             default: break;
         }
         function showInfoEvent(points) {
-            (function addInfoWindow(points) {
-                points.addEventListener("click", function(obj){
-                    let info = Common.getInfo(obj.point);
-                    let id = Common.getID(info[0] + '');
-                    let infoWindow = new BMap.InfoWindow("站点ID: "+info[0]+"<br/>" +
-                        "站点名： "+info[1]);
-                    map.openInfoWindow(infoWindow,obj.point); //开启信息窗口
-                    console.log(obj.point);
-                    if (trace.indexOf(id) == -1) {
-                        $('.charts').show();myChart.showLoading();
-                        trace.shift();trace.push(id);
-                        showHistogram2(id);
-                        if (tmplines.length >0 ) {
-                            tmplines.forEach(function (item) {
-                                map.removeOverlay(item);
-                            });
-                            tmplines.length = 0;
-                        }
+            points.addEventListener("click", function(obj){
+                let info = Common.getInfo(obj.point);
+                let id = Common.getID(info[0] + '');
+                let infoWindow = new BMap.InfoWindow("站点ID: "+info[0]+"<br/>" +
+                    "站点名： "+info[1], { enableAutoPan: false, width: 0, height: 0 });
+                map.openInfoWindow(infoWindow,obj.point); //开启信息窗口
+                if (trace.indexOf(id) == -1) {
+                    $('.charts').show();myChart.showLoading();
+                    trace.shift();trace.push(id);
+                    showHistogram2(id);
+                    if (tmplines.length >0 ) {
+                        tmplines.forEach(function (item) {
+                            map.removeOverlay(item);
+                        });
+                        tmplines.length = 0;
                     }
-                });
-            })(points);
+                }
+            });
         }
 
         // 响应点击散点函数
@@ -808,6 +931,52 @@
                 }
             });
         }
+    }
+
+    function addLines(lines) {
+        const active = $(".tab-active").find("a").attr("href");
+        const filter = parseInt($(active).find(".filter").val());
+        const maxnum = parseInt($(active).find(".max-num").text());
+        const planePath = 'path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z';
+        const coords = [];
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.nums-0 >= filter) {
+                const weight = Common.getWeight(maxnum, line.nums-0);
+                const fromCoord = Object.values(Common.getLngLat(line.lease));
+                const toCoord = Object.values(Common.getLngLat(line.return));
+                const series = {
+                    name: i + '',
+                    type: 'lines',
+                    coordinateSystem: 'bmap',
+                    zlevel: 1,
+                    symbol: ['none', 'arrow'],
+                    symbolSize: 10,
+                    effect: {
+                        show: true,
+                        period: 6,
+                        trailLength: 0,
+                        symbol: planePath,
+                        symbolSize: 15
+                    },
+                    lineStyle: {
+                        normal: {
+                            color: Common.getColor(weight),
+                            width: 10,
+                            opacity: 0.6,
+                            curveness: 0.3
+                        }
+                    },
+                    data: [fromCoord, toCoord]
+                };
+                coords.push(series);
+            }
+        }
+        console.log(coords);
+        bmap.setOption({
+            series: coords
+        });
+        $(".loading-field").hide();
     }
 
     // 加载弧线
