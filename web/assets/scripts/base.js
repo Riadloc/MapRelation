@@ -16,7 +16,7 @@
         // 构造图表
         $('.charts').show();myChart = echarts.init($('.histogram')[0]);$('.charts').hide();
         // 颜色数组
-        bmap = initialBMap();
+        initialBMap();
         colors= [red, purple, blue, limeA700, yellow600, orange600, indigoA400, cyanA200, pink, pink200, greenA200, blue200, brown600,
             yellow300, lime900, deepOrange400, green900, purple900, red900, orange200, redA100, pink900, cyan200, cyan900, lime400, lightBlue900, deepPurpleA200, green400, brown200, deepPurple200,
             indigo900, indigo100,indigo300,blueGrey700 ,grey700,grey400,black,deepOrange200];
@@ -114,106 +114,7 @@
             console.log(e.currentTarget.files[0]);//e就是你获取的file对象
         })
     }
-    function initialBMap() {
-        const bmap = echarts.init($("#bmap")[0]);
-        const option = {
-            title: {
-                text: '公共自行车流量图',
-                subtext: 'data from Hangzhou PBS',
-                left: 'center'
-            },
-            tooltip : {
-                trigger: 'item'
-            },
-            bmap: {
-                center: [120.16711642992, 30.25283633644],
-                zoom: 15,
-                mapStyle: {
-                    styleJson: [{
-                            "featureType": "all",
-                            "elementType": "all",
-                            "stylers": {
-                                "lightness": 10,
-                                "saturation": -100
-                            }
-                    }]
-                }
-            },
-            series : [
-                {
-                    name: 'scatter',
-                    type: 'scatter',
-                    coordinateSystem: 'bmap',
-                    data: [],
-                    symbolSize: 10,
-                    label: {
-                        normal: {
-                            formatter: '{b}',
-                            position: 'right',
-                            show: false
-                        },
-                        emphasis: {
-                            show: true
-                        }
-                    },
-                    itemStyle: {
-                        normal: {
-                            color: function ({data}) {
-                                return colors[data[2]-0]
-                            }
-                        }
-                    }
-                }
-            ]
-        };
-        bmap.setOption(option);
-        bmap.on('click', function (params) {
-            console.log(params);
-            const id = params.data[2];
-            if(params.componentSubType === 'scatter') {
-                if (trace.indexOf(id) == -1) {
-                    $('.charts').show();myChart.showLoading();
-                    trace.shift();trace.push(id);
-                    showHistogram2(id);
-                    if (tmplines.length >0 ) {
-                        tmplines.forEach(function (item) {
-                            map.removeOverlay(item);
-                        });
-                        tmplines.length = 0;
-                    }
-                }
-            }
 
-        });
-        const bmapInstance = bmap.getModel().getComponent('bmap').getBMap();
-        bmapInstance.enableDragging();
-        addMapControl(bmapInstance);
-        addSubWay(bmapInstance);
-        function addMapControl(instance) {
-            //缩放控件
-            const naviControl = new BMap.NavigationControl({
-                anchor : BMAP_ANCHOR_TOP_LEFT
-            });
-            instance.addControl(naviControl);
-
-            //缩略图控件
-            const overControl = new BMap.OverviewMapControl({
-                anchor : BMAP_ANCHOR_BOTTOM_RIGHT,
-                isOpen : false,
-                offset : new BMap.Size(50, 50)
-            });
-            instance.addControl(overControl);
-
-            //比例尺控件
-            const scaleControl = new BMap.ScaleControl({
-                anchor : BMAP_ANCHOR_BOTTOM_LEFT,
-                offset : new BMap.Size(50, 20)
-            });
-            instance.addControl(scaleControl);
-        }
-        return bmap;
-    }
-    
     // 绘制地铁一号线
     function addSubWay(instance) {
         let points = [
@@ -491,6 +392,36 @@
             map.clearOverlays();
             addSubWay();
         },
+        initBMapOption() {
+            bmap.clear();
+            const option = {
+                title: {
+                    text: '公共自行车流量图',
+                    subtext: 'data from Hangzhou PBS',
+                    left: 'center'
+                },
+                tooltip : {
+                    trigger: 'item'
+                },
+                bmap: {
+                    center: [120.16711642992, 30.25283633644],
+                    zoom: 15,
+                    roam: 'move',
+                    mapStyle: {
+                        styleJson: [{
+                            "featureType": "all",
+                            "elementType": "all",
+                            "stylers": {
+                                "lightness": 10,
+                                "saturation": -100
+                            }
+                        }]
+                    }
+                },
+                series : []
+            };
+            bmap.setOption(option);
+        },
         initHistogram() {
             myChart.setOption({
                 color: ['#3388DB'],
@@ -551,6 +482,72 @@
             })
         }
     };
+
+    function initialBMap() {
+        bmap = echarts.init($("#bmap")[0]);
+        const option = {
+            title: {
+                text: '公共自行车流量图',
+                subtext: 'data from Hangzhou PBS',
+                left: 'center'
+            },
+            tooltip : {
+                trigger: 'item'
+            },
+            bmap: {
+                center: [120.16711642992, 30.25283633644],
+                zoom: 15,
+                roam: 'move',
+                mapStyle: {
+                    styleJson: [{
+                        "featureType": "all",
+                        "elementType": "all",
+                        "stylers": {
+                            "lightness": 10,
+                            "saturation": -100
+                        }
+                    }]
+                }
+            },
+            series : []
+        };
+        bmap.setOption(option);
+        bmap.on('click', function (params) {
+            const id = params.data[2];
+            if(params.componentSubType === 'scatter') {
+                if (trace.indexOf(id) == -1) {
+                    $('.charts').show();myChart.showLoading();
+                    trace.shift();trace.push(id);
+                    showHistogram2(id);
+                    if (tmplines.length >0 ) {
+                        tmplines.forEach(function (item) {
+                            map.removeOverlay(item);
+                        });
+                        tmplines.length = 0;
+                    }
+                }
+            }
+
+        });
+        const bmapInstance = bmap.getModel().getComponent('bmap').getBMap();
+        addMapControl(bmapInstance);
+        addSubWay(bmapInstance);
+        function addMapControl(instance) {
+            //缩放控件
+            const naviControl = new BMap.NavigationControl({
+                anchor : BMAP_ANCHOR_TOP_LEFT
+            });
+            instance.addControl(naviControl);
+
+            //比例尺控件
+            const scaleControl = new BMap.ScaleControl({
+                anchor : BMAP_ANCHOR_BOTTOM_LEFT,
+                offset : new BMap.Size(50, 20)
+            });
+            instance.addControl(scaleControl);
+        }
+    }
+
 
     // 生成文件函数
     function generateFilesByTime(timeType) {
@@ -665,10 +662,31 @@
                 }
             });
         }
+        Common.initBMapOption();
         bmap.setOption({
             series: [{
                 name: 'scatter',
-                data: data
+                type: 'scatter',
+                coordinateSystem: 'bmap',
+                data: data,
+                symbolSize: 10,
+                label: {
+                    normal: {
+                        formatter: '{b}',
+                        position: 'right',
+                        show: false
+                    },
+                    emphasis: {
+                        show: true
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: function ({data}) {
+                            return colors[data[2]-0]
+                        }
+                    }
+                }
             }]
         })
     }
@@ -935,25 +953,26 @@
 
     function addLines(lines) {
         const active = $(".tab-active").find("a").attr("href");
-        const filter = parseInt($(active).find(".filter").val());
         const maxnum = parseInt($(active).find(".max-num").text());
+        const filter = parseInt($(active).find(".filter").val());
+        const id = trace[0];
         const planePath = 'path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z';
         const coords = [];
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
-            if (line.nums-0 >= filter) {
-                const weight = Common.getWeight(maxnum, line.nums-0);
+            if (line.nums - 0 >= filter) {
+                const weight = Common.getWeight(maxnum, line.nums - 0);
                 const fromCoord = Object.values(Common.getLngLat(line.lease));
                 const toCoord = Object.values(Common.getLngLat(line.return));
                 const series = {
                     name: i + '',
                     type: 'lines',
-                    coordinateSystem: 'bmap',
                     zlevel: 1,
+                    coordinateSystem: 'bmap',
                     symbol: ['none', 'arrow'],
                     symbolSize: 10,
                     effect: {
-                        show: true,
+                        show: weight >= 0.3,
                         period: 6,
                         trailLength: 0,
                         symbol: planePath,
@@ -962,19 +981,63 @@
                     lineStyle: {
                         normal: {
                             color: Common.getColor(weight),
-                            width: 10,
+                            width: 9 * weight,
                             opacity: 0.6,
                             curveness: 0.3
                         }
                     },
-                    data: [fromCoord, toCoord]
+                    data: [{coords: [fromCoord, toCoord], value: line.nums - 0}]
                 };
-                coords.push(series);
+                const scatter = {
+                    name: 'scatter' + i,
+                    type: 'scatter',
+                    coordinateSystem: 'bmap',
+                    data: [fromCoord.concat(id), toCoord.concat(id)],
+                    symbolSize: 10,
+                    label: {
+                        normal: {
+                            formatter: '{b}',
+                            position: 'right',
+                            show: false
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: function ({data}) {
+                                return colors[data[2] - 0]
+                            }
+                        }
+                    }
+                };
+                coords.push(series, scatter);
             }
         }
-        console.log(coords);
+        Common.initBMapOption();
         bmap.setOption({
             series: coords
+        });
+        const indexArr = bmap.getModel().getSeriesByType('lines').map(item => item.seriesIndex);
+        bmap.setOption({
+            visualMap: {
+                min: 0,
+                max: maxnum,
+                range: [Math.floor(maxnum/3), maxnum],
+                right: 20,
+                bottom: 20,
+                zlevel: 2,
+                text: ['High','Low'],
+                seriesIndex: indexArr,
+                inRange: {
+                    color: [green, yellow, red]
+                },
+                textStyle: {
+                    fontWeight: 'bold'
+                },
+                calculable : true
+            },
         });
         $(".loading-field").hide();
     }
